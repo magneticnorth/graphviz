@@ -3,10 +3,10 @@ REM variables need to be filled out , Modify only this section
 REM *****************************************************
 SET VS2008DIR="C:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE"
 SET buildBaseDir=c:\graphviz-ms\
-SET buildDir=%buildBaseDir%graphviz2\
+SET buildDir=%buildBaseDir%graphviz\
 SET targetDir=%buildBaseDir%release\
 SET outputDir=c:\graphviz-ms\bin\
-SET setupProjectDir=C:\graphviz-ms\graphviz-msi\setup\
+SET setupProjectDir=C:\graphviz-ms\windows\graphviz-msi\setup\
 SET setupProjectName=setup
 SET setupProjectFile=%setupProjectDir%%setupProjectName%.sln
 set sourceLibDir=c:\graphviz-ms\add-on\
@@ -36,15 +36,15 @@ REM *****************************************************
 wget -O %buildBaseDir%source.tar.gz %sourceUrl%
 7z x -y %buildBaseDir%source.tar.gz
 7z x -y %buildBaseDir%source.tar
-move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz2
+move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
 REM **************End of source download*****************
 
 xcopy /Y %buildDir%windows\FEATURE %buildDir%\FEATURE\ /S
 xcopy /Y %sourceLibDir%GTS %buildDir%lib\GTS\ /S
 xcopy /Y %sourceLibDir%ann_1.1.2 %buildDir%lib\ann\ /S
 xcopy /Y %sourceLibDir%release %buildBaseDir%release\ /S
-xcopy /Y %sourceLibDir%gd %buildBaseDir%\graphviz2\lib\gd\
-xcopy /Y %sourceLibDir%GL %buildBaseDir%\graphviz2\cmd\smyrna\GL\
+xcopy /Y %sourceLibDir%gd %buildBaseDir%\graphviz\lib\gd\
+xcopy /Y %sourceLibDir%GL %buildBaseDir%\graphviz\cmd\smyrna\GL\
 
 del %buildDir%libltdl\config.h /q
 copy /Y %sourceLibDir%*.lib %targetDir%bin\
