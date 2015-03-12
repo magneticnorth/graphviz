@@ -1,3 +1,4 @@
+@echo on
 cd c:\graphviz-ms
 REM variables need to be filled out , Modify only this section
 REM *****************************************************
