@@ -22,14 +22,14 @@ REM *****************************************************
 REM 84716ny
 REM clean up code , if you rpvode source manually comment out this section
 REM *****************************************************
-rmdir /S /Q %buildDir%
-rmdir /S /Q %targetDir%
-del %buildBaseDir%*.msi
-del %buildBaseDir%*.tar
-del %buildBaseDir%*.gz
-del %buildBaseDir%*.zip
-del %outputDir%*.exe
-del %outputDir%*.dll
+REM rmdir /S /Q %buildDir%
+REM rmdir /S /Q %targetDir%
+REM del %buildBaseDir%*.msi
+REM del %buildBaseDir%*.tar
+REM del %buildBaseDir%*.gz
+REM del %buildBaseDir%*.zip
+REM del %outputDir%*.exe
+REM del %outputDir%*.dll
 REM *****************************************************
 REM Comment out this section to disable source download
 REM *****************************************************
@@ -39,6 +39,7 @@ REM 7z x -y %buildBaseDir%source.tar
 REM move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
 REM **************End of source download*****************
 
+echo Got here #1
 xcopy /Y %buildDir%windows\FEATURE %buildDir%\FEATURE\ /S
 xcopy /Y %sourceLibDir%GTS %buildDir%lib\GTS\ /S
 xcopy /Y %sourceLibDir%ann_1.1.2 %buildDir%lib\ann\ /S
@@ -77,6 +78,7 @@ copy /Y %buildDir%lib\pack\pack.h %buildBaseDir%release\include\graphviz
 copy /Y %buildDir%lib\xdot\xdot.h %buildBaseDir%release\include\graphviz
 copy /Y %buildDir%lib\gvpr\gvpr.h %buildBaseDir%release\include\graphviz
 
+echo Got here #2
 REM Copy few files from source tree for windows build
 REM *****************************************************
 copy /Y %buildDir%windows\config.h %buildDir%
@@ -88,8 +90,12 @@ REM copy /Y %sourceLibDir%config.h %buildDir%
 REM *****************************************************
 REM Build release
 REM *****************************************************
+echo Going for Build
+echo devenv %buildDir%graphviz.sln -Clean release
 devenv %buildDir%graphviz.sln -Clean release
+echo devenv %buildDir%graphviz.sln -Build release -Out %buildDir%releaseLog1.txt
 devenv %buildDir%graphviz.sln -Build release -Out %buildDir%releaseLog1.txt
+echo devenv %buildDir%graphviz.sln -Build release -Out %buildDir%releaseLog2.txt
 devenv %buildDir%graphviz.sln -Build release -Out %buildDir%releaseLog2.txt
 REM *****************************************************
 REM Copy release outputs
