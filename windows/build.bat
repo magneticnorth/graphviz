@@ -33,10 +33,10 @@ del %outputDir%*.dll
 REM *****************************************************
 REM Comment out this section to disable source download
 REM *****************************************************
-wget -O %buildBaseDir%source.tar.gz %sourceUrl%
-7z x -y %buildBaseDir%source.tar.gz
-7z x -y %buildBaseDir%source.tar
-move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
+REM wget -O %buildBaseDir%source.tar.gz %sourceUrl%
+REM 7z x -y %buildBaseDir%source.tar.gz
+REM 7z x -y %buildBaseDir%source.tar
+REM move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
 REM **************End of source download*****************
 
 xcopy /Y %buildDir%windows\FEATURE %buildDir%\FEATURE\ /S
