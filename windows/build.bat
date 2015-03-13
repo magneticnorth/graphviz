@@ -16,12 +16,12 @@ set wgetPath=C:\wget\bin
 set SevenzPath="C:\Program Files\7-Zip"
 set pscpPath="C:\Program Files\PuTTY"
 set sdkPath="C:\Program Files\Microsoft SDKs\Windows\v7.0\Bin"
-set VERSION="2.39"
+set VERSION=2.39
 PATH=%PATH%;%VS2008DIR%;%wgetPath%;%SevenzPath%;%pscpPath%;%sdkPath%;
 
 REM *****************************************************
 REM 84716ny
-REM clean up code , if you rpvode source manually comment out this section
+REM clean up code , if you provide source manually comment out this section
 REM *****************************************************
 REM rmdir /S /Q %buildDir%
 REM rmdir /S /Q %targetDir%
@@ -34,10 +34,10 @@ REM del %outputDir%*.dll
 REM *****************************************************
 REM Comment out this section to disable source download
 REM *****************************************************
-REM wget -O %buildBaseDir%source.tar.gz %sourceUrl%
-REM 7z x -y %buildBaseDir%source.tar.gz
-REM 7z x -y %buildBaseDir%source.tar
-REM move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
+wget -O %buildBaseDir%source.tar.gz %sourceUrl%
+7z x -y %buildBaseDir%source.tar.gz
+7z x -y %buildBaseDir%source.tar
+move /Y %buildBaseDir%graphviz-%VERSION%.* graphviz
 REM **************End of source download*****************
 
 echo Got here #1
