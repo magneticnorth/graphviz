@@ -6,16 +6,9 @@
 **	Written by Kiem-Phong Vo (5/25/96)
 */
 
-#if __STD_C
-int dtwalk(reg Dt_t* dt, int (*userf)(Dt_t*, Void_t*, Void_t*), Void_t* data)
-#else
-int dtwalk(dt,userf,data)
-reg Dt_t*	dt;
-int(*		userf)();
-Void_t*		data;
-#endif
+int dtwalk(reg Dt_t* dt, int (*userf)(Dt_t*, void*, void*), void* data)
 {
-	reg Void_t	*obj, *next;
+	reg void	*obj, *next;
 	reg Dt_t*	walk;
 	reg int		rv;
 

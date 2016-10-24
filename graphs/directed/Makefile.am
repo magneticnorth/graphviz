@@ -28,9 +28,10 @@ test:
 		-Tcmap -Tcmapx -Tismap -Timap \
 		-Tjpg -Tpdf -Tfig -Tgif \
 		-Tpng:cairo -Tpng:gd -Tpng:cairo:gd -Tpng:cairo:cairo -Tpng:gd:gd \
-		-Tps -Tps2 -Tps:lasi -Tps:cairo -Tpdf \
+		-Tps -Tps:lasi -Tps2 -Tps:cairo -Tpdf \
 		-Tsvg -Tsvg:cairo -Tsvgz -Tvrml \
 		-O $(GRAPHS) 
+
 ins_test:
 	dot \
                 -Tcanon -Tgv -Tplain -Tplain-ext -Txdot \

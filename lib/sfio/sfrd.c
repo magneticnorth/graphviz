@@ -20,11 +20,7 @@
 */
 
 /* synchronize unseekable write streams */
-#if __STD_C
 static void _sfwrsync(void)
-#else
-static void _sfwrsync()
-#endif
 {
     reg Sfpool_t *p;
     reg Sfio_t *f;
@@ -50,16 +46,8 @@ static void _sfwrsync()
     }
 }
 
-#if __STD_C
-ssize_t sfrd(reg Sfio_t * f, reg Void_t * buf, reg size_t n,
+ssize_t sfrd(reg Sfio_t * f, reg void * buf, reg size_t n,
 	     Sfdisc_t * disc)
-#else
-ssize_t sfrd(f, buf, n, disc)
-reg Sfio_t *f;
-reg Void_t *buf;
-reg size_t n;
-Sfdisc_t *disc;
-#endif
 {
     Sfoff_t r;
     reg Sfdisc_t *dc;
@@ -205,11 +193,11 @@ Sfdisc_t *disc;
 		(void) SFSK(f, f->here, SEEK_SET, dc);
 
 		/* make a buffer */
-		(void) SFSETBUF(f, (Void_t *) f->tiny,
+		(void) SFSETBUF(f, (void *) f->tiny,
 				(size_t) SF_UNBOUND);
 
 		if (!buf) {
-		    buf = (Void_t *) f->data;
+		    buf = (void *) f->data;
 		    n = f->size;
 		}
 	    }

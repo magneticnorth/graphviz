@@ -18,15 +18,9 @@
 
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 #include <assert.h>
 #include "gvc.h"
@@ -44,7 +38,7 @@
     #pragma comment( lib, "pathplan.lib" )
     #pragma comment( lib, "vpsc.lib" )
     #pragma comment( lib, "sparse.lib" )
-    #pragma comment( lib, "gts.lib" )
+    //#pragma comment( lib, "gts.lib" )
     #pragma comment( lib, "glib-2.0.lib" )
     #pragma comment( lib, "cdt.lib" )
     #pragma comment( lib, "gvplugin_neato_layout.lib" )
@@ -428,7 +422,7 @@ static void cloneCluster(Agraph_t * old, Agraph_t * new)
 /* freef:
  * Generic free function for dictionaries.
  */
-static void freef(Dt_t * dt, Void_t * obj, Dtdisc_t * disc)
+static void freef(Dt_t * dt, void * obj, Dtdisc_t * disc)
 {
     free(obj);
 }

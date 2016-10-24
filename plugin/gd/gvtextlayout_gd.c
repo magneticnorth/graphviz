@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,7 +123,9 @@ static boolean gd_textlayout(textspan_t * span, char **fontpath)
     double fontsize;
     int brect[8];
     gdFTStringExtra strex;
+#ifdef HAVE_GD_FONTCONFIG
     PostscriptAlias *pA;
+#endif
 
     fontname = span->font->name;
     fontsize = span->font->size;

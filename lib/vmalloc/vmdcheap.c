@@ -17,17 +17,15 @@
 **
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
-#if __STD_C
-static Void_t *heapmem(Vmalloc_t * vm, Void_t * caddr,
+/**
+ * @param vm region doing allocation from
+ * @param caddr current low address
+ * @param csize current size
+ * @param nsize new size
+ * @param disc discipline structure
+ */
+static void *heapmem(Vmalloc_t * vm, void * caddr,
 		       size_t csize, size_t nsize, Vmdisc_t * disc)
-#else
-static Void_t *heapmem(vm, caddr, csize, nsize, disc)
-Vmalloc_t *vm;			/* region doing allocation from         */
-Void_t *caddr;			/* current low address                  */
-size_t csize;			/* current size                         */
-size_t nsize;			/* new size                             */
-Vmdisc_t *disc;			/* discipline structure                 */
-#endif
 {
     NOTUSED(vm);
     NOTUSED(disc);
@@ -35,11 +33,11 @@ Vmdisc_t *disc;			/* discipline structure                 */
     if (csize == 0)
 	return vmalloc(Vmheap, nsize);
     else if (nsize == 0)
-	return vmfree(Vmheap, caddr) >= 0 ? caddr : NIL(Void_t *);
+	return vmfree(Vmheap, caddr) >= 0 ? caddr : NIL(void *);
     else
 	return vmresize(Vmheap, caddr, nsize, 0);
 }
 
 static Vmdisc_t _Vmdcheap = { heapmem, NIL(Vmexcept_f), 0 };
 
-__DEFINE__(Vmdisc_t *, Vmdcheap, &_Vmdcheap);
+Vmdisc_t* Vmdcheap = &_Vmdcheap;

@@ -16,16 +16,9 @@
  *  Compile-time and run-time interface between gpr and libexpr
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 #include <stdlib.h>
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -192,7 +185,7 @@ static int posOf(Agnode_t* np, int idx, double* v)
     
 }
 
-#ifdef DEBUG
+#if DEBUG > 1
 static char *symName(Expr_t * ex, int op)
 {
     if (op >= MINNAME && op <= MAXNAME)
@@ -2116,7 +2109,7 @@ static int stringOf(Expr_t * prog, register Exnode_t * x, int arg, Exdisc_t* dis
 	}
     }
     x->type = STRING;
-    return 0;
+    return rv;
 }
 
 /* convert:

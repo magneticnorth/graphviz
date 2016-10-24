@@ -17,9 +17,7 @@
  * Updated by Emden Gansner
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -46,11 +44,7 @@ typedef struct {
 #define ND_clust(n)  ((Agraph_t*)ND_ptr(n))
 #define agfindnode(G,N) (agnode(G, N, 0))
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -260,7 +254,7 @@ static Agnode_t *base[SMALLBUF];
 static blk_t Blk;
 static stk_t Stk;
 
-static void initStk()
+static void initStk(void)
 {
     Blk.data = base;
     Blk.endp = Blk.data + SMALLBUF;
@@ -294,7 +288,7 @@ static void push(Agnode_t * np)
     *Stk.curp++ = np;
 }
 
-static Agnode_t *pop()
+static Agnode_t *pop(void)
 {
     if (Stk.curp == Stk.curblk->data) {
 	if (Stk.curblk == Stk.fstblk)

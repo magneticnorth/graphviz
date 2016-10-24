@@ -15,13 +15,12 @@
  *  This library forms the socket for run-time loadable device plugins.  
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -48,7 +47,7 @@ static char z_file_header[] =
 static z_stream z_strm;
 static unsigned char *df;
 static unsigned int dfallocated;
-static unsigned long int crc;
+static uint64_t crc;
 #endif /* HAVE_LIBZ */
 
 #include "const.h"

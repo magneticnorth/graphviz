@@ -4,6 +4,9 @@
 # Try to use version available on FC8
 AC_PREREQ(2.61)
 
+dnl ===========================================================================
+dnl Set Graphviz version information
+
 # set:
 #	graphviz_version_major
 #	graphviz_version_minor
@@ -19,13 +22,13 @@ GRAPHVIZ_VERSION_MAJOR=graphviz_version_major()
 GRAPHVIZ_VERSION_MINOR=graphviz_version_minor()
 GRAPHVIZ_VERSION_MICRO=graphviz_version_micro()
 
-#NB: "stable" or "development"
+# NB: "stable" or "development"
 GRAPHVIZ_COLLECTION=graphviz_collection()
 
-#NB: date/time of last commit - or "now"
+# NB: date/time of last commit - or "0"
 GRAPHVIZ_VERSION_DATE=graphviz_version_date()
 
-#NB: git commit hash of last commit
+# NB: git commit hash of last commit
 GRAPHVIZ_VERSION_COMMIT=graphviz_version_commit()
 
 GRAPHVIZ_SOURCES=graphviz/$GRAPHVIZ_COLLECTION/SOURCES
@@ -131,7 +134,7 @@ CYGWIN=no
 MINGW32=no
 DARWIN9=no
 case "${host_os}" in
-  *-uwin* )
+  *uwin* )
 	UWIN=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
 	CFLAGS="${CFLAGS} -DWIN32 -DMSWIN32"
@@ -141,7 +144,7 @@ case "${host_os}" in
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
-  *-cygwin* )
+  *cygwin* )
 	CYGWIN=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
 	PATHSEPARATOR=";"
@@ -150,7 +153,7 @@ case "${host_os}" in
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
-  *-mingw32* )
+  *mingw32* )
 	MINGW32=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
 	PATHSEPARATOR=":"
@@ -158,7 +161,7 @@ case "${host_os}" in
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
-  *-darwin* )
+  *darwin* )
 	DARWIN=yes
 	AC_DEFINE_UNQUOTED(DARWIN,1,[Define for any Darwin-based OS.])
 	DEFAULT_FONTPATH="~/Library/Fonts:/Library/Fonts:/Network/Library/Fonts:/System/Library/Fonts"
@@ -166,14 +169,14 @@ case "${host_os}" in
         NO_POSTSCRIPT_ALIAS=1
 	BROWSER="open"
 	JSHEXT=jnilib
+	AC_DEFINE_UNQUOTED(DARWIN_DYLIB,"$DARWIN_DYLIB",[Define for Darwin-style shared library names.])
 	case "${host_os}" in
-	*-darwin9*)
+	*darwin9*)
 		DARWIN9=yes
-		AC_DEFINE_UNQUOTED(DARWIN_DYLIB,"$DARWIN_DYLIB",[Define for Darwin-style shared library names.])
 		;;
         esac
 	case "${host_os}" in
-	*-darwin9.4* | *darwin9.5* )
+	*darwin9.4* | *darwin9.5* )
 		EXTRA_SMYRNA_LDFLAGS="-dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib"
 		;;
         esac
@@ -301,16 +304,38 @@ if test "x$TCLSH" = "x"; then
 #  fi
 fi
 
+
 dnl -----------------------------------
 dnl checks for compilers
 
 AM_PROG_CC_C_O
-#AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_OBJC
 
 AC_C_INLINE
 
+dnl ===========================================================================
+dnl Set GCC compiler flags
+
+if [test "${GCC}" == "yes"]
+then
+  # Enable common warnings flags
+  CFLAGS="${CFLAGS} -Wall"
+  
+  # Enable common extra flags
+  CFLAGS="${CFLAGS} -Wextra"
+  
+  # Enable specific warning flags not included by -Wall or -Wextra
+  CFLAGS="${CFLAGS} -Wmissing-include-dirs -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs"
+
+ # if C99, then enable additional warnings
+# if [test "${ac_cv_prog_cc_c99}" != "no"]
+# then
+    # FIXME - not available on centos[56]: gcc-4.1.2, gcc-4.4.7
+    # CFLAGS="${CFLAGS} -Wdouble-promotion -Wtrampolines -Wlogical-op"
+#  fi
+fi
 # Workaround for native compilers
 #  HP  : http://bugs.gnome.org/db/31/3163.html
 #  DEC : Enable NaN/Inf
@@ -332,7 +357,7 @@ if test "${GCC}" != "yes" ; then
 	    ;;
     esac
 else
-    AC_CHECK_PROGS(RC,windres,false)
+    AC_CHECK_PROGS(RC,[windres ${host}-windres],false)
     case "${CC}" in
 	*icc* )
 	    # -Wall causes relocation errors with icc
@@ -400,9 +425,9 @@ dnl -----------------------------------
 dnl Checks for header files
 
 # AC_HEADER_STDC
-AC_CHECK_HEADERS(stdarg.h stddef.h stddef.h stdlib.h stdint.h malloc.h \
-	fcntl.h search.h getopt.h pthread.h values.h float.h limits.h termios.h \
-	errno.h time.h unistd.h fenv.h string.h strings.h inttypes.h setjmp.h \
+AC_CHECK_HEADERS(stdarg.h stddef.h stddef.h malloc.h \
+	fcntl.h search.h pthread.h values.h float.h limits.h termios.h \
+	errno.h time.h unistd.h fenv.h strings.h setjmp.h \
 	sys/time.h sys/times.h sys/types.h sys/select.h fpu_control.h \
 	sys/fpu.h sys/socket.h sys/stat.h sys/mman.h \
 	sys/ioctl.h sys/inotify.h langinfo.h libintl.h crt_externs.h)
@@ -412,50 +437,6 @@ AC_HEADER_STDBOOL
 
 # Internationalization macros
 # AM_GNU_GETTEXT
-
-# Check for socklen_t
-AC_MSG_CHECKING([for socklen_t])
-AC_CACHE_VAL(ac_cv_type_socklen_t,[AC_EGREP_CPP(changequote(<<,>>)dnl
-<<(^|[^a-zA-Z_0-9])socklen_t[^a-zA-Z_0-9]>>dnl
-changequote([,]),[
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <stddef.h>
-    #endif
-    ], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])
-AC_MSG_RESULT($ac_cv_type_socklen_t)
-if test $ac_cv_type_socklen_t = no; then
-    AC_DEFINE(socklen_t, unsigned, [Define to unsigned if socklet_t is missing])
-fi
-
-# -----------------------------------
-# Test if compiler supports bool
-AC_MSG_CHECKING([for bool])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-    #ifdef HAVE_STDBOOL_H>
-    #include <stdbool.h>
-    #endif
-    ]], [[
-    bool foo==true, bar=false;
-    ]])],[
-AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_BOOL, 1,[Define to 1 if compiler supports bool])
-    ],[
-AC_MSG_RESULT(no)])
-
-# -----------------------------------
-# Test for direct I/O
-AC_MSG_CHECKING([for struct dioattr])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <fcntl.h>
-#include <stdio.h>]], [[
-struct dioattr dio;]])],[
-AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_STRUCT_DIOATTR, 1,
-[Define to 1 if you have struct dioattr])],[
-AC_MSG_RESULT(no)])
 
 dnl -----------------------------------
 dnl Checks for -lm library
@@ -487,8 +468,6 @@ AC_SUBST([LIBGEN_LIBS])
 # -----------------------------------
 
 # Checks for library functions
-AC_FUNC_ALLOCA
-
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
 	__freadable _sysconf getrusage strerror cbrt lsqrt vsnprintf \
 	strtoul strtoll strtoull uname memset nl_langinfo pow sqrt \
@@ -594,12 +573,19 @@ else
     SWIG_VERSION=`$SWIG -version 2>&1 | $EGREP Version | cut -d ' ' -f 3`
     SWIG_VERSION_MAJOR=`echo $SWIG_VERSION | cut -d '.' -f 1`
     SWIG_VERSION_MINOR=`echo $SWIG_VERSION | cut -d '.' -f 2`
+    SWIG_VERSION_MICRO=`echo $SWIG_VERSION | cut -d '.' -f 3`
     if test $SWIG_VERSION_MAJOR -lt 2; then
       if test $SWIG_VERSION_MAJOR -lt 1; then
 	SWIG=
       else
         if test $SWIG_VERSION_MINOR -lt 3; then
 	  SWIG=
+	else
+          # EL5 has swig-1.3.29 which does not define SWIGJAVA
+	  if test $SWIG_VERSION_MICRO -lt 40; then
+            SWIGJAVA_CPPFLAGS=-DSWIGJAVA
+            AC_SUBST([SWIGJAVA_CPPFLAGS])
+	  fi
         fi
       fi
     fi
@@ -1116,7 +1102,7 @@ else
         if test -d /usr/include/php5; then
           PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
         else
-          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM"
+          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/TSRM -I/usr/include/php/Zend -I/usr/include/php/ext -I/usr/include/php/ext/date/lib"
         fi
         PHP_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/php/modules"
         PHP_INSTALL_DATADIR="/usr/share/php"
@@ -1528,6 +1514,68 @@ fi
 AM_CONDITIONAL(WITH_PYTHON27, [test "x$use_python27" = "xYes"])
 
 dnl -----------------------------------
+dnl INCLUDES and LIBS for PYTHON34
+
+AC_ARG_ENABLE(python34,
+  [AS_HELP_STRING([--enable-python34=no],[python34 language bindings])],
+  [], [enable_python34=no])
+
+if test "x$enable_python34" != "xyes"; then
+  use_python34="No (disabled by default - for multiversion installs)"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_python34="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
+      use_python34="No (swig does not support -python option)"
+    else
+      AC_CHECK_PROG(PYTHON34,python3.4,python3.4)
+      if test "x$PYTHON34" = "x"; then
+        use_python34="No (python34 not available)"
+      else
+        PYTHON34_VERSION=`$PYTHON34 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
+        if test "x$PYTHON34_VERSION" = "x"; then
+          PYTHON34=
+        else
+          PYTHON34_VERSION_MAJOR=`echo $PYTHON34_VERSION | cut -d '.' -f 1`
+          PYTHON34_VERSION_MINOR=`echo $PYTHON34_VERSION | cut -d '.' -f 2`
+          PYTHON34_VERSION_SHORT=$PYTHON34_VERSION_MAJOR.$PYTHON34_VERSION_MINOR
+          if test $PYTHON34_VERSION_MAJOR -lt 3; then
+            if test $PYTHON34_VERSION_MINOR -lt 4; then
+	          PYTHON34=
+            fi
+          fi
+        fi
+      fi
+      if test "x$PYTHON34" = "x"; then
+	    use_python34="No (python34 is too old)"
+      else
+        PYTHON34_PREFIX=`$PYTHON3 -c "import sys; print sys.prefix"`
+#        PYTHON34_INCLUDES=-I$PYTHON34_PREFIX/include/python$PYTHON34_VERSION_SHORT
+# FIXME - whats the stupid "m" for?
+        PYTHON34_INCLUDES=-I/usr/include/python3.4m
+        PYTHON34_LIBS="-lpython$PYTHON_VERSION_SHORT"
+        PYTHON34_INSTALL_DIR="`$PYTHON34 $srcdir/config/config_python.py archsitelib`"
+        save_CPPFLAGS=$CPPFLAGS
+        CPPFLAGS="$CPPFLAGS $PYTHON34_INCLUDES"
+        AC_CHECK_HEADER(Python.h,,[
+          use_python34="No (missing header)"
+          PYTHON34=
+        ])
+        CPPFLAGS=$save_CPPFLAGS
+	if test "x$PYTHON34" != "x"; then
+	  use_python34="Yes"
+          AC_SUBST([PYTHON34_INSTALL_DIR])
+          AC_SUBST([PYTHON34_INCLUDES])
+          AC_SUBST([PYTHON34_LIBS])
+        fi
+      fi
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_PYTHON34, [test "x$use_python34" = "xYes"])
+
+dnl -----------------------------------
 dnl INCLUDES and LIBS for R
 
 AC_ARG_ENABLE(r,
@@ -1728,7 +1776,7 @@ TCL_LIBS=
 AC_SUBST([TCL_LIBS])
 
 #AC_SUBST([TCL_PREFIX])
-#AC_SUBST([TCL_EXEC_PREFIX])
+AC_SUBST([TCL_EXEC_PREFIX])
 #AC_SUBST([TCL_SHLIB_CFLAGS])
 #AC_SUBST([TCL_SHLIB_CXXFLAGS])
 #AC_SUBST([TCL_EXTRA_CFLAGS])
@@ -2037,6 +2085,7 @@ AC_ARG_WITH(rsvg,
   [AS_HELP_STRING([--with-rsvg=yes],[rsvg library])],
   [], [with_rsvg=yes])
 
+have_svg_2_36="no"
 if test "x$with_rsvg" != "xyes"; then
   use_rsvg="No (disabled)"
 else
@@ -2049,6 +2098,12 @@ else
   ],[
     use_rsvg="No (rsvg library not available)"
   ])
+  PKG_CHECK_MODULES([SVG_2_36], [librsvg-2.0 >= 2.36.0 cairo >= 1.0.0],[
+      have_svg_2_36="yes"
+      AC_DEFINE(HAVE_SVG_2_36, 1, [Have librsvg >= 2.36])
+    ],[
+      have_svg_2_36="no"
+    ])
 fi
 AM_CONDITIONAL(WITH_RSVG, [test "x$use_rsvg" = "xYes"])
 
@@ -2601,15 +2656,52 @@ if test "x$with_libgd" != "xyes"; then
 fi
 
 if test "x$use_gd" = "x"; then
+   PKG_CHECK_MODULES(GTK, [gdlib >= 2.0.33],[
+      have_gdlib=1
+# FIXME - why no features in the gdlib.pc?
+      GD_FEATURES="GD_PNG GD_JPEG GD_XPM GD_FONTCONFIG GD_FREETYPE GD_GIF GD_GIFANIM GD_OPENPOLYGON"
+   ],[
       AC_PATH_PROG(GDLIB_CONFIG,gdlib-config)
       if test -n "$GDLIB_CONFIG"; then
-        GD_INCLUDES=`$GDLIB_CONFIG --includes`
-        GD_LDFLAGS=`$GDLIB_CONFIG --ldflags | sed 's/-xarch=[^ ]* //'`
-        GD_LIBS=`$GDLIB_CONFIG --libs`
-        GD_MAJORVERSION=`$GDLIB_CONFIG --majorversion`
-        GD_MINORVERSION=`$GDLIB_CONFIG --minorversion`
-        GD_REVISION=`$GDLIB_CONFIG --revision`
-        for f in `$GDLIB_CONFIG --features` ; do
+         have_gdlib=1
+         GDLIB_CFLAGS=`$GDLIB_CONFIG --includes`
+         GDLIB_LIBS=`$GDLIB_CONFIG --libs`
+         GDLIB_VERSION=`$GDLIB_CONFIG --version 2>/dev/null`
+         GD_LDFLAGS=`$GDLIB_CONFIG --ldflags | sed 's/-xarch=[^ ]* //'`
+         GD_FEATURES=`$GDLIB_CONFIG --features`
+
+         # GD version check >= 2.0.33  -- centos-5.8 has gd-2.0.33
+         GDLIB_VERSION_MAJOR=`echo $GDLIB_VERSION | cut -d '.' -f 1`
+         GDLIB_VERSION_MINOR=`echo $GDLIB_VERSION | cut -d '.' -f 2`
+         GDLIB_VERSION_MICRO=`echo $GDLIB_VERSION | cut -d '.' -f 3`
+         REQ_GDLIB_VERSION_MAJOR=2
+         REQ_GDLIB_VERSION_MINOR=0
+         REQ_GDLIB_VERSION_MICRO=33
+         if test $GDLIB_VERSION_MAJOR -lt $REQ_GDLIB_VERSION_MAJOR; then
+            use_gd="No (major version too old)"
+         else
+            if test $GDLIB_VERSION_MAJOR -eq $REQ_GDLIB_VERSION_MAJOR; then
+              if test $GDLIB_VERSION_MINOR -lt $REQ_GDLIB_VERSION_MINOR; then
+                 use_gd="No (minor version too old)"
+              else
+                 if test $GDLIB_VERSION_MINOR -eq $REQ_GDLIB_VERSION_MINOR; then
+		            if test $GDLIB_VERSION_MICRO -lt $REQ_GDLIB_VERSION_MICRO; then
+                       use_gd="No (revision too old)"
+		            fi
+	             fi
+	          fi
+           fi
+        fi
+        if test "x$use_gd" != "x"; then
+            AC_MSG_WARN(GD library version $GDLIB_VERSION_MAJOR.$GDLIB_VERSION_MINOR.$GDLIB_VERSION_MICRO < $REQ_GDLIB_VERSION_MAJOR.$REQ_GDLIB_VERSION_MINOR.$REQ_GDLIB_VERSION_MICRO)
+        fi
+     else
+        AC_MSG_WARN(GD neither gdlib pkgconfig nor gdlib-config was found)
+     fi
+  ])
+  if test "x$have_gdlib" != "x"; then
+      AC_DEFINE_UNQUOTED(HAVE_GDLIB,1,[Define if you have the gdlib library])
+      for f in $GD_FEATURES ; do
 	    if test "$f" = "GD_PNG"; then
                 AC_DEFINE_UNQUOTED(HAVE_GD_PNG,1,[Define if the GD library supports PNG])
 	    fi
@@ -2620,12 +2712,12 @@ if test "x$use_gd" = "x"; then
                 AC_DEFINE_UNQUOTED(HAVE_GD_XPM,1,[Define if the GD library supports XPM])
 	    fi
 	    if test "$f" = "GD_FONTCONFIG"; then
-		HAVE_GD_FONTCONFIG=1
                 AC_DEFINE_UNQUOTED(HAVE_GD_FONTCONFIG,1,[Define if the GD library supports FONTCONFIG])
+		        have_gd_fontconfig=1
 	    fi
 	    if test "$f" = "GD_FREETYPE"; then
-		HAVE_GD_FREETYPE=1
                 AC_DEFINE_UNQUOTED(HAVE_GD_FREETYPE,1,[Define if the GD library supports FREETYPE])
+		        have_gd_freetype=1
 	    fi
 	    if test "$f" = "GD_GIF"; then
                 AC_DEFINE_UNQUOTED(HAVE_GD_GIF,1,[Define if the GD library supports GIF])
@@ -2636,43 +2728,19 @@ if test "x$use_gd" = "x"; then
 	    if test "$f" = "GD_OPENPOLYGON"; then
                 AC_DEFINE_UNQUOTED(HAVE_GD_OPENPOLYGON,1,[Define if the GD library supports OPENPOLYGON])
 	    fi
-        done
+      done
 
-	if test "x$HAVE_GD_FONTCONFIG" = "x"; then
-            AC_MSG_WARN(Your libgd was not built with freetype support. This may result in problems displaying fonts.)
+	if test "x$have_gd_fontconfig" = "x"; then
+        AC_MSG_WARN(Your libgd was not built with fontconfig support. This may result in problems displaying fonts.)
 	fi
-	if test "x$HAVE_GD_FREETYPE" = "x"; then
-	    AC_MSG_WARN(Your libgd was not built with fontconfig support. This may result in problems resolving fonts.)
-        fi
+	if test "x$have_gd_freetype" = "x"; then
+	    AC_MSG_WARN(Your libgd was not built with freetype support. This may result in problems resolving fonts.)
+    fi
+  fi
 
-        # GD version check >= 2.0.33  -- centos-5.8 has gd-2.0.33
-        REQ_GD_MAJORVERSION=2
-        REQ_GD_MINORVERSION=0
-        REQ_GD_REVISION=33
-        if test $GD_MAJORVERSION -lt $REQ_GD_MAJORVERSION; then
-            use_gd="No (major version too old)"
-        else
-            if test $GD_MAJORVERSION -eq $REQ_GD_MAJORVERSION; then
-                if test $GD_MINORVERSION -lt $REQ_GD_MINORVERSION; then
-                    use_gd="No (minor version too old)"
-	        else
-                    if test $GD_MINORVERSION -eq $REQ_GD_MINORVERSION; then
-		        if test $GD_REVISION -lt $REQ_GD_REVISION; then
-                            use_gd="No (revision too old)"
-		        fi
-	            fi
-	        fi
-            fi
-        fi
-        if test "x$use_gd" != "x"; then
-            AC_MSG_WARN(GD library version < $REQ_GD_MAJORVERSION.$REQ_GD_MINORVERSION.$REQ_GD_REVISION)
-        fi
-      else
-            AC_MSG_WARN(GD gdlib-config not found)
-      fi
   # prevent explicit use of -I/usr/include as it breaks mingw cross-compiles
-  if test "x$GD_INCLUDES" = "x-I/usr/include"; then
-     GD_INCLUDES="";
+  if test "x$GDLIB_CFLAGS" = "x-I/usr/include"; then
+     GDLIB_CFLAGS="";
   fi
   # prevent explicit use of -L/usr/lib or -L/usr/lib64, unnecessary clutter
   if test "x$GD_LDFLAGS" = "x-L/usr/lib"; then
@@ -2689,13 +2757,13 @@ if test "x$use_gd" = "x"; then
       save_LDFLAGS=$LDFLAGS
       AC_ARG_WITH(gdincludedir,
         [AS_HELP_STRING([--with-gdincludedir=DIR],[use GD includes from DIR])],
-        GD_INCLUDES="-I$withval")
-      CPPFLAGS="$CPPFLAGS $GD_INCLUDES"
+        GDLIB_CFLAGS="-I$withval")
+      CPPFLAGS="$CPPFLAGS $GDLIB_CFLAGS"
       AC_ARG_WITH(gdlibdir,
         [AS_HELP_STRING([--with-gdlibdir=DIR],[use GD libraries from DIR])],
         [GD_LDFLAGS="-L$withval"])
-      GD_LIBS="$GD_LDFLAGS -lgd $GD_LIBS"
-      LDFLAGS="$LDFLAGS $GD_LIBS"
+      GDLIB_LIBS="$GD_LDFLAGS -lgd $GDLIB_LIBS"
+      LDFLAGS="$LDFLAGS $GDLIB_LIBS"
       AC_CHECK_HEADER(gd.h,,[
         AC_MSG_WARN(Optional GD library not available - no gd.h)
         use_gd="No (gd headers not found)"
@@ -2715,8 +2783,8 @@ if test "x$use_gd" = "x"; then
       CPPFLAGS=$save_CPPFLAGS
     fi
   fi
-  AC_SUBST([GD_INCLUDES])
-  AC_SUBST([GD_LIBS])
+  AC_SUBST([GDLIB_CFLAGS])
+  AC_SUBST([GDLIB_LIBS])
 fi
 AM_CONDITIONAL(WITH_LIBGD, [test "x$with_libgd" = "xyes"])
 
@@ -2969,28 +3037,9 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 
 # -----------------------------------
 
-AC_MSG_CHECKING(if getopt externs are declared)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
-	#include <stdio.h>
-	#if HAVE_UNISTD_H
-	#include <unistd.h>
-	#endif
-	]], [[if ( optopt ) exit(0); else exit(1);
-	]])],[AC_MSG_RESULT(yes)
-	AC_DEFINE_UNQUOTED(HAVE_GETOPT_DECL,1,Define if getopt externs are declared)
-	],[AC_MSG_RESULT(no)
-	])
-
-# -----------------------------------
-
 AC_MSG_CHECKING(if intptr_t is declared)
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
-	#if HAVE_STDINT_H
-	#include <stdint.h>
-	#endif
-	#if HAVE_INTTYPES_H
-	#include <inttypes.h>
-	#endif
+  #include <stdint.h>
 	#if HAVE_UNISTD_H
 	#include <unistd.h>
 	#endif
@@ -3007,6 +3056,7 @@ cat > conftest.$ac_ext <<EOF
 #include "confdefs.h"
 #include "assert.h"
 int main(int argc, char **argv) {
+(void)argv;
 assert(argc);
 ; return 0; }
 EOF
@@ -3034,6 +3084,25 @@ AM_CONDITIONAL(WITH_CGRAPH, [true])
 
 # -----------------------------------------------------------------------
 
+# Checking for unit testing framework Criterion
+# This framework is used for the unit tests
+AC_CHECK_LIB(
+  criterion,
+  main,
+  [
+    use_criterion="Yes"
+    AC_DEFINE_UNQUOTED(HAVE_CRITERION,1,[Criterion unit testing framework is installed and available for use.])
+  ],
+  [
+    use_criterion="No (Criterion unit testing framework not installed)"
+    AC_MSG_WARN(Criterion unit testing framework not installed)
+  ],
+  []
+)
+AM_CONDITIONAL(HAVE_CRITERION, test "$use_criterion" = "Yes")
+
+# -----------------------------------------------------------------------
+
 # Generate Makefiles
 AC_CONFIG_FILES(Makefile
 	debian/changelog
@@ -3057,6 +3126,7 @@ AC_CONFIG_FILES(Makefile
 	lib/ast/Makefile
 	lib/sfio/Makefile
 	lib/sfio/Sfio_f/Makefile
+	lib/spine/Makefile
 	lib/vmalloc/Makefile
 	lib/dotgen/Makefile
 	lib/neatogen/Makefile
@@ -3065,6 +3135,7 @@ AC_CONFIG_FILES(Makefile
 	lib/mingle/Makefile
 	lib/label/Makefile
 	lib/sfdpgen/Makefile
+	lib/sfdpgen/libsfdp.pc
 	lib/osage/Makefile
 	lib/edgepaint/Makefile
 	lib/edgepaint/liblab_gamut.pc
@@ -3150,6 +3221,9 @@ AC_CONFIG_FILES(Makefile
 	tclpkg/gv/demo/Makefile
 	tclpkg/gv/META.gv
 	rtest/Makefile
+  tests/Makefile
+  tests/lib/Makefile
+  tests/lib/common/Makefile
 	share/Makefile
 	share/examples/Makefile
 	share/gui/Makefile
@@ -3191,7 +3265,7 @@ echo ""
 echo "graphviz-$VERSION will be compiled with the following:"
 echo ""
 echo "options:"
-echo "  cgraph:        $use_cgraph"
+echo "  cgraph:        Yes (always enabled)"
 echo "  digcola:       $use_digcola"
 echo "  expat:         $use_expat"
 echo "  fontconfig:    $use_fontconfig"
@@ -3258,6 +3332,7 @@ echo "  gv_python24:   $use_python24"
 echo "  gv_python25:   $use_python25"
 echo "  gv_python26:   $use_python26"
 echo "  gv_python27:   $use_python27"
+echo "  gv_python34:   $use_python34"
 echo "  gv_R:          $use_r"
 echo "  gv_ruby:       $use_ruby"
 echo "  gv_tcl:        $use_gv_tcl"
@@ -3265,4 +3340,6 @@ echo ""
 echo "  tcldot:        $use_tcldot"
 echo "  tclpathplan:   $use_tclpathplan"
 echo "  gdtclft:       $use_gdtclft"
-
+echo ""
+echo "Testing utilities:"
+echo "  criterion:     $use_criterion"

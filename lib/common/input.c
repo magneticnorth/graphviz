@@ -140,7 +140,8 @@ static char* dotneato_basename (char* path)
 	if (dotp && !strcasecmp(dotp+1,"exe")) *dotp = '\0';
     }
 #endif
-    while (*s) s++; s--;
+    while (*s) s++;
+    s--;
     /* skip over trailing slashes, nulling out as we go */
     while ((s > path) && ((*s == '/') || (*s == '\\')))
 	*s-- = '\0';
@@ -204,7 +205,7 @@ static int gvg_init(GVC_t *gvc, graph_t *g, char *fn, int gidx)
     gvg->g = g;
     gvg->input_filename = fn;
     gvg->graph_index = gidx;
-	return 0;
+    return 0;
 }
 
 static graph_t *P_graph;
@@ -344,6 +345,10 @@ int dotneato_args_initialize(GVC_t * gvc, int argc, char **argv)
 		break;
 	    case 'o':
 		val = getFlagOpt(argc, argv, &i);
+		if (!val) {
+		    fprintf(stderr, "Missing argument for -o flag\n");
+		    return (dotneato_usage(1));
+		}
 		if (! gvc->common.auto_outfile_names)
 		    gvjobs_output_filename(gvc, val);
 		break;

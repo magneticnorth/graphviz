@@ -21,14 +21,13 @@
 /* uses PRIVATE interface */
 #define FDP_PRIVATE 1
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #include <clusteredges.h>
 #include <fdp.h>
 #include <neatoprocs.h>
 #include "vispath.h"
+#include "pack.h"
 
 typedef struct {
     int cnt;
@@ -41,7 +40,7 @@ typedef struct {
  */
 #define INIT_SZ 100
 
-#ifdef DEBUG
+#if DEBUG > 1
 static void dumpObj(Ppoly_t * p)
 {
     int j;
@@ -284,10 +283,17 @@ int compoundEdges(graph_t * g, expand_t* pm, int edgetype)
 		    }
 		}
 		else {
-		    if (Verbose)
-			fprintf(stderr,
-				"nodes touch - falling back to straight line edges\n");
-		    rv = 1;
+		    if (rv == 0) {
+			expand_t margin = sepFactor(g);
+			int pack = getPack (g, CL_OFFSET, CL_OFFSET); 
+			agerr(AGWARN, "compoundEdges: nodes touch - falling back to straight line edges\n");
+			if ((pack <= pm->x) || (pack <= pm->y))
+			    agerr(AGPREV, "pack value %d is smaller than esep (%.03f,%.03f)\n", pack, pm->x, pm->y);
+			else if ((margin.x <= pm->x) || (margin.y <= pm->y))
+			    agerr(AGPREV, "sep value (%.03f,%.03f) is smaller than esep (%.03f,%.03f)\n",  
+				margin.x, margin.y, pm->x, pm->y);
+			rv = 1;
+		    }
 		    continue;
 		}
 

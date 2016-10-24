@@ -3,7 +3,7 @@
 
 VERSION=0.2
 
-AM_CPPFLAGS = @GD_INCLUDES@
+AM_CPPFLAGS = @GDLIB_CFLAGS@
 
 pdfdir = $(pkgdatadir)/doc/pdf
 
@@ -16,7 +16,7 @@ endif
 
 diffimg_SOURCES = diffimg.c
 
-diffimg_LDADD = @GD_LIBS@ @MATH_LIBS@
+diffimg_LDADD = @GDLIB_LIBS@ @MATH_LIBS@
 
 diffimg.1.pdf: $(srcdir)/diffimg.1
 	- $(GROFF) -Tps -man $(srcdir)/diffimg.1 | $(PS2PDF) - - >diffimg.1.pdf
@@ -24,12 +24,12 @@ diffimg.1.pdf: $(srcdir)/diffimg.1
 GRAPH = "digraph G { hello -> world }"
 
 test: diffimg
-	echo $(GRAPH) | dot -Tpng:cg >hello1.png
-	echo $(GRAPH) | dot -Tpng:cg >hello2.png
+	echo $(GRAPH) | dot -Tpng >hello1.png
+	echo $(GRAPH) | dot -Tpng >hello2.png
 	if `./diffimg hello1.png hello2.png >test1.png`;then echo same;else echo different;fi
-	echo $(GRAPH) | dot -Grankdir=LR -Tpng:cg >hello2.png
+	echo $(GRAPH) | dot -Grankdir=LR -Tpng >hello2.png
 	if `./diffimg hello1.png hello2.png >test2.png`;then echo same;else echo different;fi
 
 CLEANFILES = *.png
-EXTRA_DIST = diffimg.vcproj diffimg.1 diffimg.1.pdf
+EXTRA_DIST = diffimg.vcxproj* diffimg.1 diffimg.1.pdf
 DISTCLEANFILES = diffimg.1.pdf

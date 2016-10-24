@@ -24,13 +24,7 @@
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
 
-#if __STD_C
-static Void_t *poolalloc(Vmalloc_t * vm, reg size_t size)
-#else
-static Void_t *poolalloc(vm, size)
-Vmalloc_t *vm;
-reg size_t size;
-#endif
+static void *poolalloc(Vmalloc_t * vm, reg size_t size)
 {
     reg Vmdata_t *vd = vm->data;
     reg Block_t *tp, *next;
@@ -39,17 +33,17 @@ reg size_t size;
     reg int local;
 
     if (size <= 0)
-	return NIL(Void_t *);
+	return NIL(void *);
     else if (size != vd->pool) {
 	if (vd->pool <= 0)
 	    vd->pool = size;
 	else
-	    return NIL(Void_t *);
+	    return NIL(void *);
     }
 
     if (!(local = vd->mode & VM_TRUST)) {
 	if (ISLOCK(vd, 0))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	SETLOCK(vd, 0);
     }
 
@@ -100,16 +94,10 @@ reg size_t size;
 	(*_Vmtrace) (vm, NIL(Vmuchar_t *), (Vmuchar_t *) tp, vd->pool, 0);
 
     CLRLOCK(vd, 0);
-    return (Void_t *) tp;
+    return (void *) tp;
 }
 
-#if __STD_C
-static long pooladdr(Vmalloc_t * vm, reg Void_t * addr)
-#else
-static long pooladdr(vm, addr)
-Vmalloc_t *vm;
-reg Void_t *addr;
-#endif
+static long pooladdr(Vmalloc_t * vm, reg void * addr)
 {
     reg Block_t *bp, *tp;
     reg Vmuchar_t *laddr, *baddr;
@@ -153,13 +141,7 @@ reg Void_t *addr;
     return offset;
 }
 
-#if __STD_C
-static int poolfree(reg Vmalloc_t * vm, reg Void_t * data)
-#else
-static int poolfree(vm, data)
-reg Vmalloc_t *vm;
-reg Void_t *data;
-#endif
+static int poolfree(reg Vmalloc_t * vm, reg void * data)
 {
     reg Block_t *bp;
     reg Vmdata_t *vd = vm->data;
@@ -195,16 +177,8 @@ reg Void_t *data;
     return 0;
 }
 
-#if __STD_C
-static Void_t *poolresize(Vmalloc_t * vm, Void_t * data, size_t size,
+static void *poolresize(Vmalloc_t * vm, void * data, size_t size,
 			  int type)
-#else
-static Void_t *poolresize(vm, data, size, type)
-Vmalloc_t *vm;
-Void_t *data;
-size_t size;
-int type;
-#endif
 {
     reg Vmdata_t *vd = vm->data;
 
@@ -222,18 +196,18 @@ int type;
     }
     if (size == 0) {
 	(void) poolfree(vm, data);
-	return NIL(Void_t *);
+	return NIL(void *);
     }
 
     if (!(vd->mode & VM_TRUST)) {
 	if (ISLOCK(vd, 0))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 
 	if (size != vd->pool || KPVADDR(vm, data, pooladdr) != 0) {
 	    if (vm->disc->exceptf)
 		(void) (*vm->disc->exceptf) (vm, VM_BADADDR, data,
 					     vm->disc);
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	}
 
 	if ((vd->mode & VM_TRACE) && _Vmtrace)
@@ -244,23 +218,12 @@ int type;
     return data;
 }
 
-#if __STD_C
-static long poolsize(Vmalloc_t * vm, Void_t * addr)
-#else
-static long poolsize(vm, addr)
-Vmalloc_t *vm;
-Void_t *addr;
-#endif
+static long poolsize(Vmalloc_t * vm, void * addr)
 {
     return pooladdr(vm, addr) == 0 ? (long) vm->data->pool : -1L;
 }
 
-#if __STD_C
 static int poolcompact(Vmalloc_t * vm)
-#else
-static int poolcompact(vm)
-Vmalloc_t *vm;
-#endif
 {
     reg Block_t *fp;
     reg Seg_t *seg, *next;
@@ -296,19 +259,12 @@ Vmalloc_t *vm;
     return 0;
 }
 
-#if __STD_C
-static Void_t *poolalign(Vmalloc_t * vm, size_t size, size_t align)
-#else
-static Void_t *poolalign(vm, size, align)
-Vmalloc_t *vm;
-size_t size;
-size_t align;
-#endif
+static void *poolalign(Vmalloc_t * vm, size_t size, size_t align)
 {
     NOTUSED(vm);
     NOTUSED(size);
     NOTUSED(align);
-    return NIL(Void_t *);
+    return NIL(void *);
 }
 
 /* Public interface */
@@ -323,4 +279,4 @@ static Vmethod_t _Vmpool = {
     VM_MTPOOL
 };
 
-__DEFINE__(Vmethod_t *, Vmpool, &_Vmpool);
+Vmethod_t* Vmpool = &_Vmpool;

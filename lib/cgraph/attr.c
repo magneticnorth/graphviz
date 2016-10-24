@@ -21,7 +21,7 @@
 
 #define MINATTR	4		/* minimum allocation */
 
-static void freesym(Dict_t * d, Void_t * obj, Dtdisc_t * disc);
+static void freesym(Dict_t * d, void * obj, Dtdisc_t * disc);
 
 Dtdisc_t AgDataDictDisc = {
     (int) offsetof(Agsym_t, name),	/* use symbol name as key */
@@ -193,7 +193,7 @@ static Agrec_t *agmakeattrs(Agraph_t * context, void *obj)
 	sz = topdictsize(obj);
 	if (sz < MINATTR)
 	    sz = MINATTR;
-	rec->str = agalloc(agraphof(obj), sz * sizeof(char *));
+	rec->str = agalloc(agraphof(obj), (size_t) sz * sizeof(char *));
 	/* doesn't call agxset() so no obj-modified callbacks occur */
 	for (sym = (Agsym_t *) dtfirst(datadict); sym;
 	     sym = (Agsym_t *) dtnext(datadict, sym))
@@ -216,7 +216,7 @@ static void freeattr(Agobj_t * obj, Agattr_t * attr)
     agfree(g, attr->str);
 }
 
-static void freesym(Dict_t * d, Void_t * obj, Dtdisc_t * disc)
+static void freesym(Dict_t * d, void * obj, Dtdisc_t * disc)
 {
     Agsym_t *sym;
 

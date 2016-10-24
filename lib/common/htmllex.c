@@ -174,7 +174,7 @@ static int stylefn(htmldata_t * p, char *v)
     char* tk;
     char* buf = strdup (v);
     for (tk = strtok (buf, DELIM); tk; tk = strtok (NULL, DELIM)) {
-	c = toupper(*tk);
+	c = (char) toupper(*tk);
 	if (c == 'R') {
 	    if (!strcasecmp(tk + 1, "OUNDED")) p->style |= ROUNDED;
 	    else if (!strcasecmp(tk + 1, "ADIAL")) p->style |= RADIAL;
@@ -313,7 +313,7 @@ static int rowsfn(htmltbl_t * p, char *v)
 static int fixedsizefn(htmldata_t * p, char *v)
 {
     int rv = 0;
-    char c = toupper(*(unsigned char *) v);
+    char c = (char) toupper(*(unsigned char *) v);
     if ((c == 'T') && !strcasecmp(v + 1, "RUE"))
 	p->flags |= FIXED_FLAG;
     else if ((c != 'F') || strcasecmp(v + 1, "ALSE")) {
@@ -326,7 +326,7 @@ static int fixedsizefn(htmldata_t * p, char *v)
 static int valignfn(htmldata_t * p, char *v)
 {
     int rv = 0;
-    char c = toupper(*v);
+    char c = (char) toupper(*v);
     if ((c == 'B') && !strcasecmp(v + 1, "OTTOM"))
 	p->flags |= VALIGN_BOTTOM;
     else if ((c == 'T') && !strcasecmp(v + 1, "OP"))
@@ -341,7 +341,7 @@ static int valignfn(htmldata_t * p, char *v)
 static int halignfn(htmldata_t * p, char *v)
 {
     int rv = 0;
-    char c = toupper(*v);
+    char c = (char) toupper(*v);
     if ((c == 'L') && !strcasecmp(v + 1, "EFT"))
 	p->flags |= HALIGN_LEFT;
     else if ((c == 'R') && !strcasecmp(v + 1, "IGHT"))
@@ -356,7 +356,7 @@ static int halignfn(htmldata_t * p, char *v)
 static int cell_halignfn(htmldata_t * p, char *v)
 {
     int rv = 0;
-    char c = toupper(*v);
+    char c = (char) toupper(*v);
     if ((c == 'L') && !strcasecmp(v + 1, "EFT"))
 	p->flags |= HALIGN_LEFT;
     else if ((c == 'R') && !strcasecmp(v + 1, "IGHT"))
@@ -373,7 +373,7 @@ static int cell_halignfn(htmldata_t * p, char *v)
 static int balignfn(htmldata_t * p, char *v)
 {
     int rv = 0;
-    char c = toupper(*v);
+    char c = (char) toupper(*v);
     if ((c == 'L') && !strcasecmp(v + 1, "EFT"))
 	p->flags |= BALIGN_LEFT;
     else if ((c == 'R') && !strcasecmp(v + 1, "IGHT"))
@@ -470,7 +470,7 @@ static int scalefn(htmlimg_t * p, char *v)
 static int alignfn(int *p, char *v)
 {
     int rv = 0;
-    char c = toupper(*v);
+    char c = (char) toupper(*v);
     if ((c == 'R') && !strcasecmp(v + 1, "IGHT"))
 	*p = 'r';
     else if ((c == 'L') || !strcasecmp(v + 1, "EFT"))
@@ -749,7 +749,7 @@ static void endElement(void *user, const char *name)
  */
 static void characterData(void *user, const char *s, int length)
 {
-    int i, rc, cnt = 0;
+    int i, cnt = 0;
     unsigned char c;
 
     if (state.inCell) {
@@ -757,7 +757,7 @@ static void characterData(void *user, const char *s, int length)
 	    c = *s++;
 	    if (c >= ' ') {
 		cnt++;
-		rc = agxbputc(state.xb, c);
+		agxbputc(state.xb, c);
 	    }
 	}
 	if (cnt) state.tok = T_string;
@@ -845,7 +845,6 @@ static char *findNext(char *s, agxbuf* xb)
 {
     char* t = s + 1;
     char c;
-    int rc;
 
     if (*s == '<') {
 	if ((*t == '!') && !strncmp(t + 1, "--", 2))
@@ -865,7 +864,7 @@ static char *findNext(char *s, agxbuf* xb)
 		t = scanEntity(t + 1, xb);
 	    }
 	    else {
-		rc = agxbputc(xb, c);
+		agxbputc(xb, c);
 		t++;
 	    }
 	}
@@ -1050,7 +1049,9 @@ int htmllex()
 	if (endp)
 	    state.ptr = endp;
     } while (state.tok == 0);
-    /* printTok (state.tok); */
+#if DEBUG
+    printTok (state.tok);
+#endif
     return state.tok;
 #else
     return EOF;

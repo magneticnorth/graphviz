@@ -38,12 +38,12 @@ extern "C" {
 /* agxbput_n:
  * Append string s of length n into xb
  */
-    extern int agxbput_n(agxbuf * xb, const char *s, unsigned int n);
+    extern size_t agxbput_n(agxbuf * xb, const char *s, size_t n);
 
 /* agxbput:
  * Append string s into xb
  */
-    extern int agxbput(agxbuf * xb, const char *s);
+    extern size_t agxbput(agxbuf * xb, const char *s);
 
 /* agxbfree:
  * Free any malloced resources.
@@ -58,20 +58,19 @@ extern "C" {
 /* agxbmore:
  * Expand buffer to hold at least ssz more bytes.
  */
-    extern int agxbmore(agxbuf * xb, int unsigned ssz);
+    extern int agxbmore(agxbuf * xb, size_t ssz);
 
 /* agxbputc:
  * Add character to buffer.
  *  int agxbputc(agxbuf*, char)
  */
-#define agxbputc(X,C) ((((X)->ptr >= (X)->eptr) ? agxbmore(X,1) : 0), \
-          (int)(*(X)->ptr++ = ((unsigned char)C)))
+#define agxbputc(X,C) ((((X)->ptr >= (X)->eptr) ? agxbmore(X,1) : 0), (void)(*(X)->ptr++ = ((unsigned char)C)))
 
 /* agxbuse:
  * Null-terminates buffer; resets and returns pointer to data;
  *  char* agxbuse(agxbuf* xb)
  */
-#define agxbuse(X) (agxbputc(X,'\0'),(char*)((X)->ptr = (X)->buf))
+#define agxbuse(X) ((void)agxbputc(X,'\0'),(char*)((X)->ptr = (X)->buf))
 
 /* agxbstart:
  * Return pointer to beginning of buffer.

@@ -58,9 +58,7 @@
  *     Tokyo 102 Japan. TEL +81-3-234-2692
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 #include <stdio.h>
 
 #ifdef HAVE_ERRNO_H
@@ -103,16 +101,9 @@ extern char *sys_errlist[];
 extern char *getwd (char *);
 #endif /* !defined (SVR4) && !defined (SYSV) && !defined (USG) */
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #ifdef HAVE_INTPTR_T
 #define INT2PTR(t,v) ((t)(intptr_t)(v))
 #define PTR2INT(v) ((Sflong_t)(intptr_t)(v))

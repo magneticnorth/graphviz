@@ -45,7 +45,7 @@ libgvplugin_neato_layout_C_la_LIBADD += $(top_builddir)/lib/sfdpgen/libsfdpgen_C
 endif
 
 if WITH_WIN32
-libgvplugin_neato_layout_la_LDFLAGS += -no-undefined
+libgvplugin_neato_layout_la_LDFLAGS += -no-undefined -export-symbols $(top_srcdir)/plugin/neato_layout/gvplugin_neato_layout.def
 libgvplugin_neato_layout_la_LIBADD += $(top_builddir)/lib/cgraph/libcgraph.la $(top_builddir)/lib/cdt/libcdt.la
 endif
 
@@ -53,4 +53,4 @@ if WITH_DARWIN9
 libgvplugin_neato_layout_la_LDFLAGS += -Wl,-exported_symbol,_gvplugin_neato_layout_LTX_library -Wl,-exported_symbol,_neato_init_node -Wl,-exported_symbol,_init_nop -Wl,-exported_symbol,_user_pos
 endif
 
-EXTRA_DIST = gvplugin_neato_layout.vcproj gvplugin_neato_layout.def
+EXTRA_DIST = gvplugin_neato_layout.vcxproj* gvplugin_neato_layout.def

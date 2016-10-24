@@ -24,13 +24,15 @@ extern "C" {
 #include <io.h>
 #endif
 
+#include <inttypes.h>
+
 /*	Common types, and macros for vmalloc functions.
 **
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
 
 
-#if _PACKAGE_ast
+#if defined(_PACKAGE_ast)
 
 #if defined(__STDPP__directive) && defined(__STDPP__hide)
     __STDPP__directive pragma pp:hide getpagesize
@@ -51,7 +53,7 @@ extern "C" {
 #include	<ast_common.h>
 #include	"FEATURE/vmalloc"
 
-#endif /*_PACKAGE_ast*/
+#endif /*defined(_PACKAGE_ast)*/
 
 #undef free
 #undef malloc
@@ -59,7 +61,7 @@ extern "C" {
 #undef BITS
 
     typedef unsigned char Vmuchar_t;
-    typedef unsigned long Vmulong_t;
+    typedef uint64_t Vmulong_t;
 
     typedef union _head_u Head_t;
     typedef union _body_u Body_t;
@@ -69,11 +71,7 @@ extern "C" {
 
 #define NIL(t)		((t)0)
 #define reg		register
-#if __STD_C
 #define NOTUSED(x)	(void)(x)
-#else
-#define NOTUSED(x)	(&x,1)
-#endif
 
 /* convert an address to an integral value */
 #define VLONG(addr)	((Vmulong_t)((char*)(addr) - (char*)0) )
@@ -90,7 +88,7 @@ extern "C" {
 #define ASSERT(p)
 #define COUNT(n)
 #else
-    extern int printf _ARG_((const char *, ...));
+    extern int printf(const char *, ...);
 #if defined(__LINE__) && defined(__FILE__)
 #define PRFILELINE	printf("Assertion failed at %s:%d\n",__FILE__,__LINE__)
 #else
@@ -273,7 +271,7 @@ extern "C" {
     struct _seg_s {
 	Vmalloc_t *vm;		/* the region that holds this   */
 	Seg_t *next;		/* next segment                 */
-	Void_t *addr;		/* starting segment address     */
+	void *addr;		/* starting segment address     */
 	size_t extent;		/* extent of segment            */
 	Vmuchar_t *baddr;	/* bottom of usable memory      */
 	size_t size;		/* allocable size               */
@@ -294,7 +292,7 @@ extern "C" {
 #define RIGHT(b)	((b)->body.body.right)
 #define VM(b)		(SEG(b)->vm)
 
-#define DATA(b)		((Void_t*)((b)->body.data) )
+#define DATA(b)		((void*)((b)->body.data) )
 #define BLOCK(d)	((Block_t*)((char*)(d) - sizeof(Head_t)) )
 #define SELF(b)		((Block_t**)((b)->body.data + SIZE(b) - sizeof(Block_t*)) )
 #define LAST(b)		(*((Block_t**)(((char*)(b)) - sizeof(Block_t*)) ) )
@@ -390,7 +388,7 @@ extern "C" {
 /* clear and copy functions */
 #define INTCOPY(to,fr,n) \
 	switch(n/sizeof(int)) \
-	{ default: memcpy((Void_t*)to,(Void_t*)fr,n); break; \
+	{ default: memcpy((void*)to,(void*)fr,n); break; \
 	  case 7:	*to++ = *fr++; \
 	  case 6:	*to++ = *fr++; \
 	  case 5:	*to++ = *fr++; \
@@ -401,7 +399,7 @@ extern "C" {
 	}
 #define INTZERO(d,n) \
 	switch(n/sizeof(int)) \
-	{ default: memset((Void_t*)d,0,n); break; \
+	{ default: memset((void*)d,0,n); break; \
 	  case 7:	*d++ = 0; \
 	  case 6:	*d++ = 0; \
 	  case 5:	*d++ = 0; \
@@ -412,16 +410,16 @@ extern "C" {
 	}
 
 /* external symbols for internal use by vmalloc */
-    typedef Block_t *(*Vmsearch_f) _ARG_((Vmdata_t *, size_t, Block_t *));
+    typedef Block_t *(*Vmsearch_f) (Vmdata_t *, size_t, Block_t *);
     typedef struct _vmextern_ {
-	Block_t *(*vm_extend) _ARG_((Vmalloc_t *, size_t, Vmsearch_f));
-	int (*vm_truncate) _ARG_((Vmalloc_t *, Seg_t *, size_t, int));
+	Block_t *(*vm_extend) (Vmalloc_t *, size_t, Vmsearch_f);
+	int (*vm_truncate) (Vmalloc_t *, Seg_t *, size_t, int);
 	size_t vm_pagesize;
-	char *(*vm_strcpy) _ARG_((char *, char *, int));
-	char *(*vm_itoa) _ARG_((Vmulong_t, int));
-	void (*vm_trace) _ARG_((Vmalloc_t *,
-				Vmuchar_t *, Vmuchar_t *, size_t, size_t));
-	void (*vm_pfclose) _ARG_((Vmalloc_t *));
+	char *(*vm_strcpy) (char *, char *, int);
+	char *(*vm_itoa) (Vmulong_t, int);
+	void (*vm_trace) (Vmalloc_t *,
+				Vmuchar_t *, Vmuchar_t *, size_t, size_t);
+	void (*vm_pfclose) (Vmalloc_t *);
     } Vmextern_t;
 
 #define _Vmextend	(_Vmextern.vm_extend)
@@ -432,48 +430,38 @@ extern "C" {
 #define _Vmtrace	(_Vmextern.vm_trace)
 #define _Vmpfclose	(_Vmextern.vm_pfclose)
 
-     _BEGIN_EXTERNS_ extern Vmextern_t _Vmextern;
+     extern Vmextern_t _Vmextern;
 
 
-#if !_PACKAGE_ast
+#if !defined(_PACKAGE_ast)
 
-    extern size_t getpagesize _ARG_((void));
+    extern size_t getpagesize(void);
 
 #ifndef WIN32
-    extern void abort _ARG_((void));
-    extern ssize_t write _ARG_((int, const void *, size_t));
+    extern void abort(void);
+    extern ssize_t write(int, const void *, size_t);
 #endif
 
-#if !__STDC__ && !_hdr_stdlib
-    extern size_t strlen _ARG_((const char *));
-    extern char *strcpy _ARG_((char *, const char *));
-    extern int strcmp _ARG_((const char *, const char *));
-    extern int atexit _ARG_((void (*)(void)));
-    extern char *getenv _ARG_((const char *));
-    extern Void_t *memcpy _ARG_((Void_t *, const Void_t *, size_t));
-    extern Void_t *memset _ARG_((Void_t *, int, size_t));
-#else
 #ifndef cfree
 #define cfree ______cfree
 #endif
 #include	<stdlib.h>
 #undef cfree
 #include	<string.h>
-#endif
 
 /* for malloc.c */
 #ifndef WIN32
-    extern int creat _ARG_((const char *, int));
-    extern int close _ARG_((int));
+    extern int creat(const char *, int);
+    extern int close(int);
 #endif
-    extern int getpid _ARG_((void));
+    extern int getpid(void);
 
 /* for vmexit.c */
 #ifndef WIN32
-    extern int onexit _ARG_((void (*)(void)));
-    extern void _exit _ARG_((int));
+    extern int onexit(void(*)(void));
+    extern void _exit(int);
 #endif
-    extern void _cleanup _ARG_((void));
+    extern void _cleanup(void);
 
 #endif				/*!PACKAGE_ast */
 
@@ -481,11 +469,10 @@ extern "C" {
 #if !_typ_ssize_t
     typedef int ssize_t;
 #endif
-#if !_WIN32
-    extern Vmuchar_t *sbrk _ARG_((ssize_t));
+#if !defined(_WIN32)
+    extern Vmuchar_t *sbrk(ssize_t);
 #endif
 
-     _END_EXTERNS_
 #endif				/* _VMHDR_H */
 #ifdef __cplusplus
 }

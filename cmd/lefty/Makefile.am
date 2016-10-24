@@ -31,35 +31,30 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/cmd/lefty/os/mswin32 \
 	-I$(top_srcdir)/cmd/lefty/dot2l @XAW_INCLUDES@
 
-AM_CFLAGS = -DHAVE_CONFIG_H @X_CFLAGS@
+AM_CFLAGS = @X_CFLAGS@
 else
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/cmd/lefty/ws/x11 \
 	-I$(top_srcdir)/cmd/lefty/os/unix \
 	-I$(top_srcdir)/cmd/lefty/dot2l @XAW_INCLUDES@
 
-AM_CFLAGS = -DLEFTYDATADIR=\"$(leftydir)\" -DHAVE_CONFIG_H @X_CFLAGS@
+AM_CFLAGS = -DLEFTYDATADIR=\"$(leftydir)\" @X_CFLAGS@
 endif
 
-
-man = lefty.1
-pdf = lefty.1.pdf
-
 noinst_HEADERS = code.h common.h display.h exec.h g.h gfxview.h internal.h \
-	io.h lex.h mem.h parse.h str.h tbl.h txtview.h
+	leftyio.h lex.h mem.h parse.h str.h tbl.h txtview.h
 
 if WITH_X
 if WITH_XAW
 bin_PROGRAMS = lefty
-man_MANS = $(man)
-pdf_DATA = $(pdf)
 endif
 endif
 if WITH_WIN32
 bin_PROGRAMS = lefty
-man_MANS = $(man)
-pdf_DATA = $(pdf)
 endif
+
+man_MANS = lefty.1
+pdf_DATA = lefty.1.pdf
 
 lefty_DATA = lefty.psp
 
@@ -81,7 +76,7 @@ lefty.res : ws/mswin32/lefty.rc
 	rc -l 0x409 -Iws/mswin32 '-IC:\\progra~1\\microsoft visual studio 8\\vc\\PlatformSDK\\include' -DNDEBUG -fo lefty.res ws/mswin32/lefty.rc
 else
 lefty.res : ws/mswin32/lefty.rc
-	windres -l 0x409 -Iws/mswin32 -DNDEBUG -Ocoff -o lefty.res ws/mswin32/lefty.rc
+	$(RC) -l 0x409 -I$(top_srcdir)/cmd/lefty/ws/mswin32 -DNDEBUG -Ocoff -o lefty.res $(top_srcdir)/cmd/lefty/ws/mswin32/lefty.rc
 endif
 
 else
@@ -96,7 +91,6 @@ endif
 lefty.1.pdf: $(srcdir)/lefty.1
 	- @GROFF@ -Tps -man $(srcdir)/lefty.1 | @PS2PDF@ - - >lefty.1.pdf
 
-EXTRA_DIST = $(lefty_DATA) $(man) $(pdf) \
-	lefty.vcproj colors.txt aix_mods cs2l/*
+EXTRA_DIST = $(lefty_DATA) $(man_MANS) $(pdf_DATA) lefty.vcxproj* colors.txt aix_mods cs2l/*
 
-DISTCLEANFILES = $(pdf)
+DISTCLEANFILES = $(pdf_DATA)

@@ -11,13 +11,12 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "gvconfig.h"
 
 #include	<string.h>
+#include    <regex.h>
 
 #ifdef ENABLE_LTDL
 #include	<sys/types.h>
@@ -28,8 +27,6 @@
 #define GLOB_NOMATCH    3   /* No matches found.  */
 #define GLOB_NOSORT     4
 #define DMKEY "Software\\Microsoft" //key to look for library dir
-#include "regex_win32.h"
-//#include        <regex_win32.c>
 typedef struct {
     int gl_pathc;           /* count of total paths so far */
     int gl_matchc;          /* count of paths matching pattern */
@@ -40,7 +37,6 @@ typedef struct {
 static void globfree (glob_t* pglob);
 static int glob (GVC_t * gvc, char*, int, int (*errfunc)(const char *, int), glob_t*);
 #else
-#include        <regex.h>
 #include	<glob.h>
 #endif 
 #include	<sys/stat.h>

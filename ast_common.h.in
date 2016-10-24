@@ -1,24 +1,10 @@
 #ifndef _AST_COMMON_H
 #define _AST_COMMON_H   1
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
+#include "config.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #  define _sys_types 1
-#endif
-
-#ifdef HAVE_LIMITS_H
-#  define _hdr_limits 1
-#endif
-
-#ifdef HAVE_FLOAT_H
-#  define _hdr_float 1
-#endif
-
-#ifdef HAVE_VALUES_H
-#  define _hdr_values 1
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -45,24 +31,12 @@
 #  define _sys_times 1
 #endif
 
-#ifdef HAVE_STDLIB_H
-#  define _hdr_stdlib 1
-#endif
-
 #ifdef HAVE_SYS_SOCKET_H
 #  define _sys_socket 1
 #endif
 
 #ifdef HAVE_SYS_STAT_H
 #  define _sys_stat 1
-#endif
-
-#ifdef HAVE_STRING_H
-#  define _hdr_string 1
-#endif
-
-#ifdef HAVE_STDINT_H
-#  define _hdr_stdint 1
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -80,23 +54,9 @@
 #define _proto_stdc 1		/* Standard-C prototypes ok  */
 /* */
 
-/* __STD_C indicates that the language is ANSI-C or C++ */
-#if !defined(__STD_C) && __STDC__
-#define __STD_C         1
-#endif
-#if !defined(__STD_C) && (__cplusplus || c_plusplus)
-#define __STD_C         1
-#endif
-#if !defined(__STD_C) && _proto_stdc
-#define __STD_C         1
-#endif
-#if !defined(__STD_C)
-#define __STD_C         0
-#endif
-
 /* extern symbols must be protected against C++ name mangling */
 #ifndef _BEGIN_EXTERNS_
-#  if __cplusplus || c_plusplus
+#  if defined(__cplusplus) || defined(c_plusplus)
 #    define _BEGIN_EXTERNS_ extern "C" {
 #    define _END_EXTERNS_   }
 #  else
@@ -104,15 +64,6 @@
 #    define _END_EXTERNS_
 #  endif
 #endif /*_BEGIN_EXTERNS_*/
-
-/* _ARG_ simplifies function prototyping among flavors of C */
-#ifndef _ARG_
-#if __STD_C
-#define _ARG_(x)        x
-#else
-#define _ARG_(x)        ()
-#endif
-#endif /*_ARG_*/
 
 /* __INLINE__ is the inline keyword */
 #if !defined(__INLINE__) && defined(__cplusplus)
@@ -122,21 +73,12 @@
 #define __INLINE__      __inline
 #endif
 
-/* Void_t is defined so that Void_t* can address any type */
-#ifndef Void_t
-#if __STD_C
-#define Void_t          void
-#else
-#define Void_t          char
-#endif
-#endif				/*Void_t */
-
 /* dynamic linked library external scope handling */
 #undef extern
-#if _dll_import && !defined(__EXPORT__) && _DLL_BLD
+#if defined(_dll_import) && !defined(__EXPORT__) && _DLL_BLD
 #define __EXPORT__      __declspec(dllexport)
 #endif
-#if _dll_import && !defined(__IMPORT__)
+#if defined(_dll_import) && !defined(__IMPORT__)
 #define __IMPORT__      __declspec(dllimport)
 #endif
 #if !defined(_astimport)
@@ -147,25 +89,17 @@
 #endif
 #endif /*_astimport*/
 
-#if !_DLL_BLD && _dll_import
-#define __EXTERN__(T,obj)       extern T obj; T* _imp__ ## obj = &obj
-#define __DEFINE__(T,obj,val)   T obj = val; T* _imp__ ## obj = &obj
-#else
-#define __EXTERN__(T,obj)       extern T obj
-#define __DEFINE__(T,obj,val)   T obj = val
-#endif
-
 #ifndef _AST_STD_H
-#       if _hdr_stddef
+#       if defined(_hdr_stddef)
 #       include <stddef.h>
 #       endif
-#       if _hdr_stdarg
+#       if defined(_hdr_stdarg)
 #       include <stdarg.h>
 #       endif
-#       if _hdr_varargs
+#       if defined(_hdr_varargs)
 #       include <varargs.h>
 #       endif
-#       if _sys_types
+#       if defined(_sys_types)
 #       include <sys/types.h>
 #       endif
 #endif

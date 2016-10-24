@@ -21,9 +21,7 @@
    was not constrained.)
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -78,6 +76,22 @@ static void svg_bzptarray(GVJ_t * job, pointf * A, int n)
 	}
     }
 #endif
+}
+
+static void svg_print_id_class(GVJ_t * job, char* id, char* idx, char* kind, void* obj)
+{
+    char* str;
+
+    gvputs(job, "<g id=\"");
+    gvputs(job, xml_string(id));
+    if (idx)
+	gvprintf (job, "_%s", xml_string(idx));
+    gvprintf(job, "\" class=\"%s", kind);
+    if ((str = agget(obj, "class")) && *str) {
+	gvputs(job, " ");
+	gvputs(job, xml_string(str));
+    }
+    gvputs(job, "\"");
 }
 
 static void svg_print_color(GVJ_t * job, gvcolor_t color)
@@ -208,9 +222,10 @@ static void svg_end_graph(GVJ_t * job)
 static void svg_begin_layer(GVJ_t * job, char *layername, int layerNum,
 			    int numLayers)
 {
-    gvputs(job, "<g id=\"");
-    gvputs(job, xml_string(layername));
-    gvputs(job, "\" class=\"layer\">\n");
+    obj_state_t *obj = job->obj;
+
+    svg_print_id_class(job, layername, NULL, "layer", obj->u.g);
+    gvputs(job, ">\n");
 }
 
 static void svg_end_layer(GVJ_t * job)
@@ -228,9 +243,7 @@ static void svg_begin_page(GVJ_t * job)
 
     /* its really just a page of the graph, but its still a graph,
      * and it is the entire graph if we're not currently paging */
-    gvputs(job, "<g id=\"");
-    gvputs(job, xml_string(obj->id));
-    gvputs(job, "\" class=\"graph\"");
+    svg_print_id_class(job, obj->id, NULL, "graph", obj->u.g);
     gvprintf(job,
 	     " transform=\"scale(%g %g) rotate(%d) translate(%g %g)\">\n",
 	     job->scale.x, job->scale.y, -job->rotation,
@@ -252,9 +265,8 @@ static void svg_begin_cluster(GVJ_t * job)
 {
     obj_state_t *obj = job->obj;
 
-    gvputs(job, "<g id=\"");
-    gvputs(job, xml_string(obj->id));
-    gvputs(job, "\" class=\"cluster\">");
+    svg_print_id_class(job, obj->id, NULL, "cluster", obj->u.sg);
+    gvputs(job, ">\n");
     gvputs(job, "<title>");
     gvputs(job, xml_string(agnameof(obj->u.g)));
     gvputs(job, "</title>\n");
@@ -268,12 +280,14 @@ static void svg_end_cluster(GVJ_t * job)
 static void svg_begin_node(GVJ_t * job)
 {
     obj_state_t *obj = job->obj;
+    char* idx;
 
-    gvputs(job, "<g id=\"");
-    gvputs(job, xml_string(obj->id));
     if (job->layerNum > 1)
-	gvprintf (job, "_%s", xml_string(job->gvc->layerIDs[job->layerNum]));
-    gvputs(job, "\" class=\"node\">");
+	idx = job->gvc->layerIDs[job->layerNum];
+    else
+	idx = NULL;
+    svg_print_id_class(job, obj->id, idx, "node", obj->u.n);
+    gvputs(job, ">\n");
     gvputs(job, "<title>");
     gvputs(job, xml_string(agnameof(obj->u.n)));
     gvputs(job, "</title>\n");
@@ -289,9 +303,8 @@ static void svg_begin_edge(GVJ_t * job)
     obj_state_t *obj = job->obj;
     char *ename;
 
-    gvputs(job, "<g id=\"");
-    gvputs(job, xml_string(obj->id));
-    gvputs(job, "\" class=\"edge\">");
+    svg_print_id_class(job, obj->id, NULL, "edge", obj->u.e);
+    gvputs(job, ">\n");
 
     gvputs(job, "<title>");
     ename = strdup_and_subst_obj("\\E", (void *) (obj->u.e));
@@ -340,7 +353,7 @@ svg_begin_anchor(GVJ_t * job, char *href, char *tooltip, char *target,
 #endif
     if (tooltip && tooltip[0]) {
 	gvputs(job, " xlink:title=\"");
-	gvputs(job, xml_string(tooltip));
+	gvputs(job, xml_string0(tooltip, 1));
 	gvputs(job, "\"");
     }
     if (target && target[0]) {
@@ -722,7 +735,7 @@ gvdevice_features_t device_features_svg = {
 };
 
 gvdevice_features_t device_features_svgz = {
-    GVDEVICE_BINARY_FORMAT | GVDEVICE_COMPRESSED_FORMAT | GVDEVICE_DOES_TRUECOLOR,	/* flags */
+    GVDEVICE_DOES_TRUECOLOR|GVDEVICE_DOES_LAYERS|GVDEVICE_BINARY_FORMAT|GVDEVICE_COMPRESSED_FORMAT, /* flags */
     {0., 0.},			/* default margin - points */
     {0., 0.},			/* default page width, height - points */
     {72., 72.},			/* default dpi */

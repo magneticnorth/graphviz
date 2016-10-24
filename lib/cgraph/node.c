@@ -13,7 +13,7 @@
 
 #include <cghdr.h>
 
-Agnode_t *agfindnode_by_id(Agraph_t * g, unsigned long id)
+Agnode_t *agfindnode_by_id(Agraph_t * g, IDTYPE id)
 {
     Agsubnode_t *sn;
     static Agsubnode_t template;
@@ -27,7 +27,7 @@ Agnode_t *agfindnode_by_id(Agraph_t * g, unsigned long id)
 
 Agnode_t *agfindnode_by_name(Agraph_t * g, char *name)
 {
-    unsigned long id;
+    IDTYPE id;
 
     if (agmapnametoid(g, AGNODE, name, &id, FALSE))
 	return agfindnode_by_id(g, id);
@@ -67,7 +67,7 @@ Agnode_t *agprvnode(Agraph_t * g, Agnode_t * n)
 
 
 /* internal node constructor */
-static Agnode_t *newnode(Agraph_t * g, unsigned long id, unsigned long seq)
+static Agnode_t *newnode(Agraph_t * g, IDTYPE id, uint64_t seq)
 {
     Agnode_t *n;
 
@@ -116,7 +116,7 @@ static void initnode(Agraph_t * g, Agnode_t * n)
 }
 
 /* external node constructor - create by id */
-Agnode_t *agidnode(Agraph_t * g, unsigned long id, int cflag)
+Agnode_t *agidnode(Agraph_t * g, IDTYPE id, int cflag)
 {
     Agraph_t *root;
     Agnode_t *n;
@@ -143,7 +143,7 @@ Agnode_t *agnode(Agraph_t * g, char *name, int cflag)
 {
     Agraph_t *root;
     Agnode_t *n;
-    unsigned long id;
+    IDTYPE id;
 
     root = agroot(g);
     /* probe for existing node */
@@ -217,10 +217,10 @@ int agdelnode(Agraph_t * g, Agnode_t * n)
 static void dict_relabel(Agnode_t * n, void *arg)
 {
     Agraph_t *g;
-    unsigned long new_id;
+    uint64_t new_id;
 
     g = agraphof(n);
-    new_id = *(unsigned long *) arg;
+    new_id = *(uint64_t *) arg;
     dtdelete(g->n_id, n);	/* wrong, should be subrep */
     AGID(n) = new_id;
     dtinsert(g->n_id, n);	/* also wrong */
@@ -231,7 +231,7 @@ static void dict_relabel(Agnode_t * n, void *arg)
 int agrelabel_node(Agnode_t * n, char *newname)
 {
     Agraph_t *g;
-    unsigned long new_id;
+    IDTYPE new_id;
 
     g = agroot(agraphof(n));
     if (agfindnode_by_name(g, newname))
@@ -273,22 +273,26 @@ Agnode_t *agsubnode(Agraph_t * g, Agnode_t * n0, int cflag)
 
 int agsubnodeidcmpf(Dict_t * d, void *arg0, void *arg1, Dtdisc_t * disc)
 {
-    long	v;
     Agsubnode_t *sn0, *sn1;
+
     sn0 = (Agsubnode_t *) arg0;
     sn1 = (Agsubnode_t *) arg1;
-    v = (AGID(sn0->node) - AGID(sn1->node));
-    return ((v==0)?0:(v<0?-1:1));
+    
+    if (AGID(sn0->node) < AGID(sn1->node)) return -1;
+    if (AGID(sn0->node) > AGID(sn1->node)) return 1;
+    return 0; 
 }
 
 int agsubnodeseqcmpf(Dict_t * d, void *arg0, void *arg1, Dtdisc_t * disc)
 {
     Agsubnode_t *sn0, *sn1;
-    long	v;
+
     sn0 = (Agsubnode_t *) arg0;
     sn1 = (Agsubnode_t *) arg1;
-    v = (AGSEQ(sn0->node) - AGSEQ(sn1->node));
-    return ((v==0)?0:(v<0?-1:1));
+
+    if (AGSEQ(sn0->node) < AGSEQ(sn1->node)) return -1;
+    if (AGSEQ(sn0->node) > AGSEQ(sn1->node)) return 1;
+    return 0; 
 }
 
 /* free_subnode:
@@ -330,3 +334,47 @@ Dtdisc_t Ag_subnode_seq_disc = {
     agdictobjmem,
     NIL(Dtevent_f)
 };
+
+void agnodesetfinger(Agraph_t * g, Agnode_t * n, void *ignored)
+{
+    static Agsubnode_t template;
+	template.node = n;
+	dtsearch(g->n_seq,&template);
+    NOTUSED(ignored);
+}
+
+void agnoderenew(Agraph_t * g, Agnode_t * n, void *ignored)
+{
+    dtrenew(g->n_seq, dtfinger(g->n_seq));
+    NOTUSED(n);
+    NOTUSED(ignored);
+}
+
+int agnodebefore(Agnode_t *fst, Agnode_t *snd)
+{
+	Agraph_t *g;
+	Agnode_t *n, *nxt;
+	
+
+	g = agroot(fst);
+	if (AGSEQ(fst) > AGSEQ(snd)) return SUCCESS;
+
+	/* move snd out of the way somewhere */
+	n = snd;
+	if (agapply (g, (Agobj_t *) n, (agobjfn_t) agnodesetfinger, n, FALSE) != SUCCESS) return FAILURE;
+	AGSEQ(snd) = (g->clos->seq[AGNODE] + 2);
+	if (agapply (g, (Agobj_t *) n, (agobjfn_t) agnoderenew, n, FALSE) != SUCCESS) return FAILURE;
+	n = agprvnode(g,snd);
+	do {
+		nxt = agprvnode(g,n);
+		if (agapply (g, (Agobj_t *) n, (agobjfn_t) agnodesetfinger, n, FALSE) != SUCCESS) return FAILURE;
+		AGSEQ(n) = AGSEQ(n) + 1;
+		if (agapply (g, (Agobj_t *) n, (agobjfn_t) agnoderenew, n, FALSE) != SUCCESS) return FAILURE;
+		if (n == fst) break;
+		n = nxt;
+	} while (n);
+	if (agapply (g, (Agobj_t *) snd, (agobjfn_t) agnodesetfinger, n, FALSE) != SUCCESS) return FAILURE;
+	AGSEQ(snd) = AGSEQ(fst) - 1;
+	if (agapply (g, (Agobj_t *) snd, (agobjfn_t) agnoderenew, snd, FALSE) != SUCCESS) return FAILURE;
+	return SUCCESS;
+} 

@@ -16,9 +16,7 @@
  * Written by Emden Gansner
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef WIN32 /*dependencies*/
     #pragma comment( lib, "cgraph.lib" )
@@ -45,11 +43,7 @@ typedef struct {
 
 #include "ingraphs.h"
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 #define NODES 1
 #define EDGES 2
@@ -175,7 +169,7 @@ static Agnode_t *base[SMALLBUF];
 static blk_t Blk;
 static stk_t Stk;
 
-static void initStk()
+static void initStk(void)
 {
     Blk.data = base;
     Blk.endp = Blk.data + SMALLBUF;
@@ -209,7 +203,7 @@ static void push(Agnode_t * np)
     *Stk.curp++ = np;
 }
 
-static Agnode_t *pop()
+static Agnode_t *pop(void)
 {
     if (Stk.curp == Stk.curblk->data) {
 	if (Stk.curblk == Stk.fstblk)
@@ -326,7 +320,7 @@ static void emit(Agraph_t * g, int root, int cl_count)
 static int eval(Agraph_t * g, int root)
 {
     Agraph_t *subg;
-    int cl_count;
+    int cl_count = 0;
 
     if (root && !(GTYPE(g) & gtype))
 	return 1;
@@ -335,10 +329,8 @@ static int eval(Agraph_t * g, int root)
 	aginit(g, AGNODE, "nodeinfo", sizeof(Agnodeinfo_t), TRUE);
     }
 
-    if ((flags & CL) && root) {
-	cl_count = 0;
-	agapply(g, (Agobj_t *) g, cntCluster, &cl_count, 0);
-    }
+    if ((flags & CL) && root)
+        agapply(g, (Agobj_t *) g, cntCluster, &cl_count, 0);
 
     emit(g, root, cl_count);
 

@@ -18,20 +18,14 @@
 
 #endif
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "cgraph.h"
 #include "ingraphs.h"
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 #ifndef HUGE
 /* HUGE is not defined on 64bit HP-UX */
@@ -170,7 +164,7 @@ static void post(Agraph_t * g)
     char buf[256];
     char dflt[256];
     Agsym_t *sym;
-    Agsym_t *psym;
+    Agsym_t *psym = NULL;
     double dist, oldmax;
     double maxdist = 0.0;	/* maximum "finite" distance */
 

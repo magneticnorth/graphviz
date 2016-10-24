@@ -21,9 +21,8 @@
 #ifdef WIN32
 #include "libltdl/lt_system.h"
 #endif
-#ifndef _MSC_VER
+
 #include <unistd.h>
-#endif
 #include <ctype.h>
 
 /*
@@ -257,8 +256,8 @@ edge_t *debug_getedge(graph_t * g, char *s0, char *s1)
     else
 	return NULL;
 }
-Agraphinfo_t* GD_info(g) { return ((Agraphinfo_t*)AGDATA(g));}
-Agnodeinfo_t* ND_info(n) { return ((Agnodeinfo_t*)AGDATA(n));}
+Agraphinfo_t* GD_info(graph_t * g) { return ((Agraphinfo_t*)AGDATA(g));}
+Agnodeinfo_t* ND_info(node_t * n) { return ((Agnodeinfo_t*)AGDATA(n));}
 #endif
 
 #if !defined(MSWIN32) && !defined(WIN32)
@@ -701,9 +700,10 @@ chkPort (port (*pf)(node_t*, char*, char*), node_t* n, char* s)
 	*cp = ':';
 	pt.name = cp+1;
     }
-    else
+    else {
 	pt = pf(n, s, NULL);
 	pt.name = s;
+    }
     return pt;
 }
 
@@ -1243,12 +1243,26 @@ static void undoCompound(edge_t * e, graph_t * clg)
     node_t *h = aghead(e);
     node_t *ntail;
     node_t *nhead;
+    edge_t* ce;
 
     if (!(IS_CLUST_NODE(t) || IS_CLUST_NODE(h)))
 	return;
     ntail = mapN(t, clg);
     nhead = mapN(h, clg);
-    cloneEdge(e, ntail, nhead);
+    ce = cloneEdge(e, ntail, nhead);
+
+    /* transfer drawing information */
+    ED_spl(ce) = ED_spl(e);
+    ED_spl(e) = NULL;
+    ED_label(ce) = ED_label(e);
+    ED_label(e) = NULL;
+    ED_xlabel(ce) = ED_xlabel(e);
+    ED_xlabel(e) = NULL;
+    ED_head_label(ce) = ED_head_label(e);
+    ED_head_label(e) = NULL;
+    ED_tail_label(ce) = ED_tail_label(e);
+    ED_tail_label(e) = NULL;
+    gv_cleanup_edge(e);
 }
 
 /* undoClusterEdges:
@@ -1259,17 +1273,20 @@ static void undoCompound(edge_t * e, graph_t * clg)
 void undoClusterEdges(graph_t * g)
 {
     node_t *n;
+    node_t *nextn;
     edge_t *e;
     graph_t *clg;
 
     clg = agsubg(g, "__clusternodes",1);
-	agbindrec(clg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);
+    agbindrec(clg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
 	    undoCompound(e, clg);
 	}
     }
-    for (n = agfstnode(clg); n; n = agnxtnode(clg, n)) {
+    for (n = agfstnode(clg); n; n = nextn) { 
+	nextn = agnxtnode(clg, n);
+	gv_cleanup_node(n);
 	agdelete(g, n);
     }
     agclose(clg);
@@ -1430,12 +1447,9 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
     unsigned char buf[BUFSIZ];
     unsigned char c;
     unsigned int v;
-    int ignored;
 
     int uc;
     int ui;
-
-    NOTUSED(ignored);
 
     if (lastg != g) {
 	lastg = g;
@@ -1476,12 +1490,12 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 		    if (v < 0x7F) /* entity needs 1 byte in UTF8 */
 			c = v;
 		    else if (v < 0x07FF) { /* entity needs 2 bytes in UTF8 */
-			ignored = agxbputc(&xb, (v >> 6) | 0xC0);
+			agxbputc(&xb, (v >> 6) | 0xC0);
 			c = (v & 0x3F) | 0x80;
 		    }
 		    else { /* entity needs 3 bytes in UTF8 */
-			ignored = agxbputc(&xb, (v >> 12) | 0xE0);
-			ignored = agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
+			agxbputc(&xb, (v >> 12) | 0xE0);
+			agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
 			c = (v & 0x3F) | 0x80;
 		    }
 		    }
@@ -1489,7 +1503,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
         else /* copy n byte UTF8 characters */
             for (ui = 0; ui < uc; ++ui)
                 if ((*s & 0xC0) == 0x80) {
-                    ignored = agxbputc(&xb, c);
+                    agxbputc(&xb, c);
                     c = *(unsigned char*)s++;
                 }
                 else { 
@@ -1500,7 +1514,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 		            c = cvtAndAppend (c, &xb);
                     break;
 	            }
-	    ignored = agxbputc(&xb, c);
+	    agxbputc(&xb, c);
     }
     ns = strdup (agxbuse(&xb));
     agxbfree(&xb);
@@ -1518,10 +1532,7 @@ char* latin1ToUTF8 (char* s)
     agxbuf xb;
     unsigned char buf[BUFSIZ];
     unsigned int  v;
-    int ignored;
 
-    NOTUSED(ignored);
-    
     agxbinit(&xb, BUFSIZ, buf);
 
     /* Values are either a byte (<= 256) or come from htmlEntity, whose
@@ -1533,15 +1544,15 @@ char* latin1ToUTF8 (char* s)
 	    if (!v) v = '&';
         }
 	if (v < 0x7F)
-	    ignored = agxbputc(&xb, v);
+	    agxbputc(&xb, v);
 	else if (v < 0x07FF) {
-	    ignored = agxbputc(&xb, (v >> 6) | 0xC0);
-	    ignored = agxbputc(&xb, (v & 0x3F) | 0x80);
+	    agxbputc(&xb, (v >> 6) | 0xC0);
+	    agxbputc(&xb, (v & 0x3F) | 0x80);
 	}
 	else {
-	    ignored = agxbputc(&xb, (v >> 12) | 0xE0);
-	    ignored = agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
-	    ignored = agxbputc(&xb, (v & 0x3F) | 0x80);
+	    agxbputc(&xb, (v >> 12) | 0xE0);
+	    agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
+	    agxbputc(&xb, (v & 0x3F) | 0x80);
 	}
     }
     ns = strdup (agxbuse(&xb));
@@ -1562,20 +1573,17 @@ utf8ToLatin1 (char* s)
     unsigned char buf[BUFSIZ];
     unsigned char c;
     unsigned char outc;
-    int ignored;
 
-    NOTUSED(ignored);
-    
     agxbinit(&xb, BUFSIZ, buf);
 
     while ((c = *(unsigned char*)s++)) {
 	if (c < 0x7F)
-	    ignored = agxbputc(&xb, c);
+	    agxbputc(&xb, c);
 	else {
 	    outc = (c & 0x03) << 6;
 	    c = *(unsigned char*)s++;
 	    outc = outc | (c & 0x3F);
-	    ignored = agxbputc(&xb, outc);
+	    agxbputc(&xb, outc);
 	}
     }
     ns = strdup (agxbuse(&xb));
@@ -2043,3 +2051,4 @@ findCluster (Dt_t* map, char* name)
 Agnodeinfo_t* ninf(Agnode_t* n) {return (Agnodeinfo_t*)AGDATA(n);}
 Agraphinfo_t* ginf(Agraph_t* g) {return (Agraphinfo_t*)AGDATA(g);}
 Agedgeinfo_t* einf(Agedge_t* e) {return (Agedgeinfo_t*)AGDATA(e);}
+/* void dumpG(Agraph_t* g) { agwrite(g, stderr); } */

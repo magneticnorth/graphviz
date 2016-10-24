@@ -17,12 +17,7 @@
 **
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
-#if __STD_C
 int vmclose(Vmalloc_t * vm)
-#else
-int vmclose(vm)
-Vmalloc_t *vm;
-#endif
 {
     reg Seg_t *seg, *vmseg;
     reg Vmemory_f memoryf;
@@ -36,7 +31,7 @@ Vmalloc_t *vm;
 	return -1;
 
     if (vm->disc->exceptf &&
-	(*vm->disc->exceptf) (vm, VM_CLOSE, NIL(Void_t *), vm->disc) < 0)
+	(*vm->disc->exceptf) (vm, VM_CLOSE, NIL(void *), vm->disc) < 0)
 	return -1;
 
     /* make this region inaccessible until it disappears */

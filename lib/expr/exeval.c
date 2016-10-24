@@ -17,9 +17,7 @@
  * expression library evaluator
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef GVDLL
 #define _BLD_sfio 1
@@ -106,7 +104,7 @@ evaldyn (Expr_t * ex, register Exnode_t * expr, void *env, int delete)
 				key = (*ex->disc->keyf) (ex, v, type, ex->disc);
 			} else
 				key.integer = v.integer;
-			sfsprintf(buf, sizeof(buf), "0x%I*x", sizeof(v.integer), key.integer);
+			sfsprintf(buf, sizeof(buf), "%I*x", sizeof(v.integer), key.integer);
 			keyname = buf;
 		} else
 			keyname = v.string;
@@ -935,7 +933,7 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 	register Extype_t**	t;
 	register int		n;
 	Extype_t		v;
-	Extype_t		r;
+	Extype_t		r = {0};
 	Extype_t		i;
 	char*			e;
 	Exnode_t		tmp;

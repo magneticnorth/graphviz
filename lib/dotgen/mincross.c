@@ -47,11 +47,12 @@ static adjmatrix_t *new_matrix(int i, int j);
 static void free_matrix(adjmatrix_t * p);
 static int ordercmpf(int *i0, int *i1);
 #ifdef DEBUG
+#if DEBUG > 1
 static int gd_minrank(Agraph_t *g) {return GD_minrank(g);}
 static int gd_maxrank(Agraph_t *g) {return GD_maxrank(g);}
 static rank_t *gd_rank(Agraph_t *g, int r) {return &GD_rank(g)[r];}
 static int nd_order(Agnode_t *v) { return ND_order(v); }
-
+#endif
 void check_rs(graph_t * g, int null_ok);
 void check_order(void);
 void check_vlists(graph_t * g);
@@ -69,7 +70,7 @@ static edge_t **TE_list;
 static int *TI_list;
 static boolean ReMincross;
 
-#ifdef DEBUG
+#if DEBUG > 1
 static void indent(graph_t* g)
 {
   if (g->parent) {
@@ -617,7 +618,7 @@ static void exchange(node_t * v, node_t * w)
 static void balanceNodes(graph_t * g, int r, node_t * v, node_t * w)
 {
     node_t *s;			/* separator node */
-    int sepIndex;
+    int sepIndex = 0;
     int nullType;		/* type of null nodes */
     int cntDummy = 0, cntOri = 0;
     int k = 0, m = 0, k1 = 0, m1 = 0, i = 0;
@@ -1105,7 +1106,7 @@ void rec_reset_vlists(graph_t * g)
 	    w = furthestnode(g, v, 1);
 	    GD_rankleader(g)[r] = u;
 #ifdef DEBUG
-	    assert(GD_rank(dot_root(g)[r].v[ND_order(u)] == u);
+	    assert(GD_rank(dot_root(g))[r].v[ND_order(u)] == u);
 #endif
 	    GD_rank(g)[r].v = GD_rank(dot_root(g))[r].v + ND_order(u);
 	    GD_rank(g)[r].n = ND_order(w) - ND_order(u) + 1;
@@ -1920,7 +1921,7 @@ void check_rs(graph_t * g, int null_ok)
 		if (null_ok == FALSE)
 		    abort();
 	    } else {
-		fprintf(stderr, "%s(%d)\t", agnameof(v), ND_mval(v));
+		fprintf(stderr, "%s(%f)\t", agnameof(v), ND_mval(v));
 		assert(ND_rank(v) == r);
 		assert(v != prev);
 		prev = v;

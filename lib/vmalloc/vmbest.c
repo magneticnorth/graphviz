@@ -43,13 +43,7 @@ static size_t S_junk;		/* total junk space                     */
 static int Vmcheck = 0;		/* 1 if checking                        */
 
 /* Check to see if a block is in the free tree */
-#if __STD_C
-static vmintree(Block_t * node, Block_t * b)
-#else
-static vmintree(node, b)
-Block_t *node;
-Block_t *b;
-#endif
+static int vmintree(Block_t * node, Block_t * b)
 {
     Block_t *t;
 
@@ -64,13 +58,7 @@ Block_t *b;
 }
 
 /* Check to see if a block is known to be free */
-#if __STD_C
-static vmisfree(Vmdata_t * vd, Block_t * b)
-#else
-static vmisfree(vd, b)
-Vmdata_t *vd;
-Block_t *b;
-#endif
+static int vmisfree(Vmdata_t * vd, Block_t * b)
 {
     Block_t *t;
     size_t s;
@@ -88,12 +76,7 @@ Block_t *b;
 }
 
 /* check to see if the tree is in good shape */
-#if __STD_C
-static vmchktree(Block_t * node)
-#else
-static vmchktree(node)
-Block_t *node;
-#endif
+static int vmchktree(Block_t * node)
 {
     Block_t *t;
 
@@ -114,13 +97,7 @@ Block_t *node;
     return 1;
 }
 
-#if __STD_C
-static vmonlist(Block_t * list, Block_t * b)
-#else
-static vmonlist(list, b)
-Block_t *list;
-Block_t *b;
-#endif
+static int vmonlist(Block_t * list, Block_t * b)
 {
     for (; list; list = LINK(list))
 	if (list == b)
@@ -128,14 +105,12 @@ Block_t *b;
     return 0;
 }
 
-#if __STD_C
-static vmcheck(Vmdata_t * vd, size_t size, int wild)
-#else
-static vmcheck(vd, size, wild)
-Vmdata_t *vd;
-size_t size;			/* if > 0, checking that no large free block >size      */
-int wild;			/* if != 0, do above but allow wild to be >size         */
-#endif
+/**
+ * @param vd
+ * @param size if > 0, checking that no large free block >size
+ * @param wild if != 0, do above but allow wild to be >size
+ */
+static int vmcheck(Vmdata_t * vd, size_t size, int wild)
 {
     reg Seg_t *seg;
     reg Block_t *b, *endb, *t, *np;
@@ -226,15 +201,8 @@ int wild;			/* if != 0, do above but allow wild to be >size         */
 #define RLINK(s,x)	((s) = LEFT(s) = (x))
 #define LLINK(s,x)	((s) = RIGHT(s) = (x))
 /* Find and delete a suitable element in the free tree. */
-#if __STD_C
 static Block_t *bestsearch(Vmdata_t * vd, reg size_t size,
 			   Block_t * wanted)
-#else
-static Block_t *bestsearch(vd, size, wanted)
-Vmdata_t *vd;
-reg size_t size;
-Block_t *wanted;
-#endif
 {
     reg size_t s;
     reg Block_t *t, *root, *l, *r;
@@ -339,14 +307,7 @@ Block_t *wanted;
 }
 
 /* Reclaim all delayed free blocks into the free tree */
-#if __STD_C
 static int bestreclaim(reg Vmdata_t * vd, Block_t * wanted, int c)
-#else
-static int bestreclaim(vd, wanted, c)
-reg Vmdata_t *vd;
-Block_t *wanted;
-int c;
-#endif
 {
     reg size_t size, s;
     reg Block_t *fp, *np, *t, *list, **cache;
@@ -520,13 +481,11 @@ int c;
     return count;
 }
 
-#if __STD_C
-static Void_t *bestalloc(Vmalloc_t * vm, reg size_t size)
-#else
-static Void_t *bestalloc(vm, size)
-Vmalloc_t *vm;			/* region allocating from       */
-reg size_t size;		/* desired block size           */
-#endif
+/**
+ * @param vm region allocating from
+ * @param size desired block size
+ */
+static void *bestalloc(Vmalloc_t * vm, reg size_t size)
 {
     reg Vmdata_t *vd = vm->data;
     reg size_t s;
@@ -539,7 +498,7 @@ reg size_t size;		/* desired block size           */
     if (!(local = vd->mode & VM_TRUST)) {
 	GETLOCAL(vd, local);
 	if (ISLOCK(vd, local))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	SETLOCK(vd, local);
 	orgsize = size;
     }
@@ -619,7 +578,7 @@ reg size_t size;		/* desired block size           */
 	    vd->mode &= ~VM_AGAIN;
 	else {
 	    CLRLOCK(vd, local);
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	}
     }
 
@@ -664,13 +623,11 @@ reg size_t size;		/* desired block size           */
     return DATA(tp);
 }
 
-#if __STD_C
-static long bestaddr(Vmalloc_t * vm, Void_t * addr)
-#else
-static long bestaddr(vm, addr)
-Vmalloc_t *vm;			/* region allocating from       */
-Void_t *addr;			/* address to check             */
-#endif
+/**
+ * @param vm region allocating from
+ * @param addr address to check
+ */
+static long bestaddr(Vmalloc_t * vm, void * addr)
 {
     reg Seg_t *seg;
     reg Block_t *b, *endb;
@@ -725,13 +682,7 @@ Void_t *addr;			/* address to check             */
     return offset;
 }
 
-#if __STD_C
-static int bestfree(Vmalloc_t * vm, Void_t * data)
-#else
-static int bestfree(vm, data)
-Vmalloc_t *vm;
-Void_t *data;
-#endif
+static int bestfree(Vmalloc_t * vm, void * data)
 {
     reg Vmdata_t *vd = vm->data;
     reg Block_t *bp, **cache;
@@ -781,23 +732,21 @@ Void_t *data;
     return 0;
 }
 
-#if __STD_C
-static Void_t *bestresize(Vmalloc_t * vm, Void_t * data, reg size_t size,
+/**
+ * @param vm region allocation from
+ * @param data old block of data
+ * @param size new size
+ * @param type !=0 to move, <0 for not copy
+ */
+static void *bestresize(Vmalloc_t * vm, void * data, reg size_t size,
 			  int type)
-#else
-static Void_t *bestresize(vm, data, size, type)
-Vmalloc_t *vm;			/* region allocating from       */
-Void_t *data;			/* old block of data            */
-reg size_t size;		/* new size                     */
-int type;			/* !=0 to move, <0 for not copy */
-#endif
 {
     reg Vmdata_t *vd = vm->data;
     reg Block_t *rp, *np, *t, **cache;
     reg size_t s, bs;
     reg int local, *d, *ed;
     size_t oldsize = 0, orgsize = 0;
-    Void_t *orgdata;
+    void *orgdata;
     orgdata = 0;
 
      /**/ COUNT(N_resize);
@@ -811,15 +760,15 @@ int type;			/* !=0 to move, <0 for not copy */
     }
     if (size == 0) {
 	(void) bestfree(vm, data);
-	return NIL(Void_t *);
+	return NIL(void *);
     }
 
     if (!(local = vd->mode & VM_TRUST)) {
 	GETLOCAL(vd, local);
 	if (ISLOCK(vd, local))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	if (!local && KPVADDR(vm, data, bestaddr) != 0)
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	SETLOCK(vd, local);
 
 	orgdata = data;		/* for tracing */
@@ -892,7 +841,7 @@ int type;			/* !=0 to move, <0 for not copy */
 	goto do_free;
     } else if (s < size) {
 	if (!(type & (VM_RSMOVE | VM_RSCOPY)))	/* see if old data is moveable */
-	    data = NIL(Void_t *);
+	    data = NIL(void *);
 	else {
 	    ed = (int *) data;
 	    if (size < ((s & ~BITS) + bs))
@@ -932,13 +881,11 @@ int type;			/* !=0 to move, <0 for not copy */
     return data;
 }
 
-#if __STD_C
-static long bestsize(Vmalloc_t * vm, Void_t * addr)
-#else
-static long bestsize(vm, addr)
-Vmalloc_t *vm;			/* region allocating from       */
-Void_t *addr;			/* address to check             */
-#endif
+/**
+ * @param vm region allocating from
+ * @param addr address to check
+ */
+static long bestsize(Vmalloc_t * vm, void * addr)
 {
     reg Seg_t *seg;
     reg Block_t *b, *endb;
@@ -977,12 +924,7 @@ Void_t *addr;			/* address to check             */
     return size;
 }
 
-#if __STD_C
 static int bestcompact(Vmalloc_t * vm)
-#else
-static int bestcompact(vm)
-Vmalloc_t *vm;
-#endif
 {
     reg Seg_t *seg, *next;
     reg Block_t *bp, *t;
@@ -1049,14 +991,7 @@ Vmalloc_t *vm;
     return 0;
 }
 
-#if __STD_C
-static Void_t *bestalign(Vmalloc_t * vm, size_t size, size_t align)
-#else
-static Void_t *bestalign(vm, size, align)
-Vmalloc_t *vm;
-size_t size;
-size_t align;
-#endif
+static void *bestalign(Vmalloc_t * vm, size_t size, size_t align)
 {
     reg Vmuchar_t *data;
     reg Block_t *tp, *np;
@@ -1066,12 +1001,12 @@ size_t align;
     reg Vmdata_t *vd = vm->data;
 
     if (size <= 0 || align <= 0)
-	return NIL(Void_t *);
+	return NIL(void *);
 
     if (!(local = vd->mode & VM_TRUST)) {
 	GETLOCAL(vd, local);
 	if (ISLOCK(vd, local))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	SETLOCK(vd, local);
 	orgsize = size;
 	orgalign = align;
@@ -1146,44 +1081,42 @@ size_t align;
 
      /**/ ASSERT(!vd->root || vmchktree(vd->root));
 
-    return (Void_t *) data;
+    return (void *) data;
 }
 
 /*	A discipline to get memory using sbrk() or VirtualAlloc on win32 */
-#if __STD_C
-static Void_t *sbrkmem(Vmalloc_t * vm, Void_t * caddr,
+/**
+ * @param vm region doing allocation from
+ * @param caddr current address
+ * @param csize current size
+ * @param nsize new size
+ * @param disc discipline structure
+ */
+static void *sbrkmem(Vmalloc_t * vm, void * caddr,
 		       size_t csize, size_t nsize, Vmdisc_t * disc)
-#else
-static Void_t *sbrkmem(vm, caddr, csize, nsize, disc)
-Vmalloc_t *vm;			/* region doing allocation from         */
-Void_t *caddr;			/* current address                      */
-size_t csize;			/* current size                         */
-size_t nsize;			/* new size                             */
-Vmdisc_t *disc;			/* discipline structure                 */
-#endif
 {
 #if _std_malloc || _BLD_INSTRUMENT || cray
     NOTUSED(vm);
     NOTUSED(disc);
 
     if (csize == 0)
-	return (Void_t *) malloc(nsize);
+	return (void *) malloc(nsize);
     if (nsize == 0)
 	free(caddr);
-    return NIL(Void_t *);
+    return NIL(void *);
 #else
 #if defined(_WIN32)
     NOTUSED(vm);
     NOTUSED(disc);
 
     if (csize == 0)
-	return (Void_t *) VirtualAlloc(NIL(LPVOID), nsize, MEM_COMMIT,
+	return (void *) VirtualAlloc(NIL(LPVOID), nsize, MEM_COMMIT,
 				       PAGE_READWRITE);
     else if (nsize == 0)
 	return VirtualFree((LPVOID) caddr, 0,
-			   MEM_RELEASE) ? caddr : NIL(Void_t *);
+			   MEM_RELEASE) ? caddr : NIL(void *);
     else
-	return NIL(Void_t *);
+	return NIL(void *);
 #else
     reg Vmuchar_t *addr;
     reg ssize_t size;
@@ -1192,7 +1125,7 @@ Vmdisc_t *disc;			/* discipline structure                 */
 
     /* sbrk, see if still own current address */
     if (csize > 0 && sbrk(0) != (Vmuchar_t *) caddr + csize)
-	return NIL(Void_t *);
+	return NIL(void *);
 
     /* do this because sbrk() uses 'ssize_t' argument */
     size =
@@ -1200,9 +1133,9 @@ Vmdisc_t *disc;			/* discipline structure                 */
 	csize ? (ssize_t) (nsize - csize) : -(ssize_t) (csize - nsize);
 
     if ((addr = sbrk(size)) == (Vmuchar_t *) (-1))
-	return NIL(Void_t *);
+	return NIL(void *);
     else
-	return csize == 0 ? (Void_t *) addr : caddr;
+	return csize == 0 ? (void *) addr : caddr;
 #endif
 #endif
 }
@@ -1246,7 +1179,7 @@ static Vmalloc_t _Vmheap = {
     NIL(Vmalloc_t *)		/* next             */
 };
 
-__DEFINE__(Vmalloc_t *, Vmheap, &_Vmheap);
-__DEFINE__(Vmalloc_t *, Vmregion, &_Vmheap);
-__DEFINE__(Vmethod_t *, Vmbest, &_Vmbest);
-__DEFINE__(Vmdisc_t *, Vmdcsbrk, &_Vmdcsbrk);
+Vmalloc_t* Vmheap = &_Vmheap;
+Vmalloc_t* Vmregion = &_Vmheap;
+Vmethod_t* Vmbest = &_Vmbest;
+Vmdisc_t* Vmdcsbrk = &_Vmdcsbrk;

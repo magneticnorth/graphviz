@@ -22,15 +22,13 @@
 */
 #define MAX_SSIZE	((ssize_t)((~((size_t)0)) >> 1))
 
-#if __STD_C
+/**
+ * @param fr moving data from this stream
+ * @param fw moving data to this stream
+ * @param n number of bytes/records to move. <0 for unbounded move
+ * @param rc record separator
+ */
 Sfoff_t sfmove(Sfio_t * fr, Sfio_t * fw, Sfoff_t n, reg int rc)
-#else
-Sfoff_t sfmove(fr, fw, n, rc)
-Sfio_t *fr;			/* moving data from this stream */
-Sfio_t *fw;			/* moving data to this stream */
-Sfoff_t n;			/* number of bytes/records to move. <0 for unbounded move */
-reg int rc;			/* record separator */
-#endif
 {
     reg uchar *cp, *next;
     reg ssize_t r, w;
@@ -116,7 +114,7 @@ reg int rc;			/* record separator */
 			    goto done_filbuf;
 			else if (n > 1 && !fr->disc) {
 			    r = sfpkrd(fr->file,
-				       (Void_t *) fr->data,
+				       (void *) fr->data,
 				       fr->size, rc, -1, (int) (-n));
 			    if (r <= 0)
 				goto one_r;
@@ -183,7 +181,7 @@ reg int rc;			/* record separator */
 	    r = cp - next;
 	    if (fr->mode & SF_PKRD) {	/* advance the read point by proper amount */
 		fr->mode &= ~SF_PKRD;
-		(void) read(fr->file, (Void_t *) next, r);
+		(void) read(fr->file, (void *) next, r);
 		fr->here += r;
 		if (!direct)
 		    fr->endb = cp;
@@ -197,7 +195,7 @@ reg int rc;			/* record separator */
 	else if ((w = endb - cp) > 0) {	/* move left-over to read stream */
 	    if (w > fr->size)
 		w = fr->size;
-	    memcpy((Void_t *) fr->data, (Void_t *) cp, w);
+	    memcpy((void *) fr->data, (void *) cp, w);
 	    fr->endb = fr->data + w;
 	    if ((w = endb - (cp + w)) > 0)
 		(void) SFSK(fr, (Sfoff_t) (-w), SEEK_CUR, fr->disc);
@@ -207,9 +205,9 @@ reg int rc;			/* record separator */
 	    if (direct == SF_WRITE)
 		fw->next += r;
 	    else if (r <= (fw->endb - fw->next)) {
-		memcpy((Void_t *) fw->next, (Void_t *) next, r);
+		memcpy((void *) fw->next, (void *) next, r);
 		fw->next += r;
-	    } else if ((w = SFWRITE(fw, (Void_t *) next, r)) != r) {	/* a write error happened */
+	    } else if ((w = SFWRITE(fw, (void *) next, r)) != r) {	/* a write error happened */
 		if (w > 0) {
 		    r -= w;
 		    if (rc < 0)

@@ -1267,7 +1267,7 @@ static int processTbl(graph_t * g, htmltbl_t * tbl, htmlenv_t * env)
     pitem *rp;
     pitem *cp;
     Dt_t *cdict;
-    int r, c, cnt;
+    int r, c;
     htmlcell_t *cellp;
     htmlcell_t **cells;
     Dt_t *rows = tbl->u.p.rows;
@@ -1278,7 +1278,7 @@ static int processTbl(graph_t * g, htmltbl_t * tbl, htmlenv_t * env)
     Dt_t *is = openIntSet();
 
     rp = (pitem *) dtflatten(rows);
-    cnt = 0;
+    size_t cnt = 0;
     r = 0;
     while (rp) {
 	cdict = rp->u.rp;
@@ -1953,8 +1953,9 @@ void printTxt(htmltxt_t * txt, int ind)
 	fprintf(stderr, "[%d] %d items\n", i, txt->spans[i].nitems);
 	for (j = 0; j < txt->spans[i].nitems; j++) {
 	    indent(ind + 2);
-	    fprintf(stderr, "[%d] (%f) \"%s\" ",
-		    j, txt->spans[i].items[j].size,
+	    fprintf(stderr, "[%d] (%f,%f) \"%s\" ",
+		    j, txt->spans[i].items[j].size.x,
+            txt->spans[i].items[j].size.y,
 		    txt->spans[i].items[j].str);
 	    if (txt->spans[i].items[j].font)
 		fprintf(stderr, "font %s color %s size %f\n",

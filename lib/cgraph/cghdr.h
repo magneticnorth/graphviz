@@ -19,21 +19,11 @@
 #define EXTERN extern
 #endif
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <cgraph.h>
 
 #include	 	<ctype.h>
-
-#ifdef HAVE_AST
-#include		<ast.h>
-#include		<vmalloc.h>
-#else
-#ifdef HAVE_VMALLOC
-#include		<vmalloc.h>
-#endif				/* HAVE_VMALLOC */
 #include		<sys/types.h>
 #include		<stdarg.h>
 #include		<stdlib.h>
@@ -41,29 +31,15 @@
 #ifdef HAVE_UNISTD_H
 #include	<unistd.h>
 #endif				/* HAVE_UNISTD_H */
-#endif				/* HAVE_AST */
 #ifdef DEBUG
 #include <assert.h>
 #else
 #define assert(x)
 #endif
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 
 #ifndef streq
 #define streq(s,t)		((*s == *t) && !strcmp((s),(t)))
-#endif
-#ifdef offsetof
-#undef offsetof
-#endif
-#ifdef HAVE_INTPTR_T
-#define offsetof(typ,fld)  ((intptr_t)(&(((typ*)0)->fld)))
-#else
-#define offsetof(typ,fld)  ((int)(&(((typ*)0)->fld)))
 #endif
 #define NOTUSED(var)	(void) var
 
@@ -110,21 +86,21 @@ int agstrclose(Agraph_t * g);
 void agmarkhtmlstr(char *s);
 
 	/* object set management */
-Agnode_t *agfindnode_by_id(Agraph_t * g, unsigned long id);
+Agnode_t *agfindnode_by_id(Agraph_t * g, IDTYPE id);
 Dtcompar_f agdictorder(Agraph_t *, Dict_t *, Dtcompar_f);
 int agedgecmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc);
 int agnamecmpf(Dict_t * d, void *, void *, Dtdisc_t * disc);
 void agset_node_disc(Agraph_t * g, Dtdisc_t * disc);
-unsigned long agnextseq(Agraph_t * g, int objtype);
+uint64_t agnextseq(Agraph_t * g, int objtype);
 
 /* dict helper functions */
 Dict_t *agdtopen(Agraph_t * g, Dtdisc_t * disc, Dtmethod_t * method);
 void agdtdisc(Agraph_t * g, Dict_t * dict, Dtdisc_t * disc);
 long agdtdelete(Agraph_t * g, Dict_t * dict, void *obj);
 int agdtclose(Agraph_t * g, Dict_t * dict);
-void *agdictobjmem(Dict_t * dict, Void_t * p, size_t size,
+void *agdictobjmem(Dict_t * dict, void * p, size_t size,
 		   Dtdisc_t * disc);
-void agdictobjfree(Dict_t * dict, Void_t * p, Dtdisc_t * disc);
+void agdictobjfree(Dict_t * dict, void * p, Dtdisc_t * disc);
 
 	/* name-value pair operations */
 Agdatadict_t *agdatadict(Agraph_t * g, int cflag);
@@ -146,16 +122,16 @@ void aglexbad(void);
 
 	/* ID management */
 int agmapnametoid(Agraph_t * g, int objtype, char *str,
-		  unsigned long *result, int allocflag);
-int agallocid(Agraph_t * g, int objtype, unsigned long request);
-void agfreeid(Agraph_t * g, int objtype, unsigned long id);
+          IDTYPE *result, int allocflag);
+int agallocid(Agraph_t * g, int objtype, IDTYPE request);
+void agfreeid(Agraph_t * g, int objtype, IDTYPE id);
 char *agprintid(Agobj_t * obj);
 int aginternalmaplookup(Agraph_t * g, int objtype, char *str,
-			unsigned long *result);
+            IDTYPE *result);
 void aginternalmapinsert(Agraph_t * g, int objtype, char *str,
-			 unsigned long result);
-char *aginternalmapprint(Agraph_t * g, int objtype, unsigned long id);
-int aginternalmapdelete(Agraph_t * g, int objtype, unsigned long id);
+             IDTYPE result);
+char *aginternalmapprint(Agraph_t * g, int objtype, IDTYPE id);
+int aginternalmapdelete(Agraph_t * g, int objtype, IDTYPE id);
 void aginternalmapclose(Agraph_t * g);
 void agregister(Agraph_t * g, int objtype, void *obj);
 

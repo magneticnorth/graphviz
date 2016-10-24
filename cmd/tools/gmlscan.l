@@ -4,9 +4,7 @@
 #include <stdlib.h>
 #include <gml2gv.h>
 #include <gmlparse.h>
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifndef HAVE_UNISTD_H
 #define YY_NO_UNISTD_H
@@ -127,7 +125,7 @@ void yyerror(char *str)
 	return;
     errors = 1;
     sprintf(buf," %s in line %d near '%s'\n", str,line_num,yytext);
-    agerr(AGWARN,buf);
+    agerr(AGWARN, "%s", buf);
 }
 
 int gmlerrors()

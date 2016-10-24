@@ -672,7 +672,7 @@ double *getSizes(Agraph_t * g, pointf pad, int* n_elabels, int** elabels)
 {
     Agnode_t *n;
     real *sizes = N_GNEW(2 * agnnodes(g), real);
-    int i, nedge_nodes;
+    int i, nedge_nodes = 0;
     int* elabs;
 
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
@@ -1140,9 +1140,11 @@ removeOverlapWith (graph_t * G, adjust_data* am)
 	    break;
 	case AM_PUSH:
 	    /* scanAdjust (G, 1); */
+        ret = 0;
 	    break;
 	case AM_PUSHPULL:
 	    /* scanAdjust (G, 0); */
+        ret = 0;
 	    break;
 	case AM_PORTHO_YX:
 	case AM_PORTHO:
@@ -1153,6 +1155,7 @@ removeOverlapWith (graph_t * G, adjust_data* am)
 	case AM_ORTHOXY:
 	case AM_ORTHOYX:
 	    cAdjust(G, am->mode);
+        ret = 0;
 	    break;
 	case AM_COMPRESS:
 	    ret = scAdjust(G, -1);
@@ -1173,6 +1176,7 @@ removeOverlapWith (graph_t * G, adjust_data* am)
 	default:		/* to silence warnings */
 	    if ((am->mode != AM_VOR) && (am->mode != AM_SCALE))
 		agerr(AGWARN, "Unhandled adjust option %s\n", am->print);
+	    ret = 0;
 	    break;
 	}
 /* fprintf (stderr, "%s %.4f sec\n", am->print, elapsed_sec()); */
@@ -1238,7 +1242,7 @@ int adjustNodes(graph_t * G)
  * Return 1 on success, 0 on failure
  */
 static int
-parseFactor (char* s, expand_t* pp, float sepfact)
+parseFactor (char* s, expand_t* pp, float sepfact, float dflt)
 {
     int i;
     float x, y;
@@ -1253,8 +1257,18 @@ parseFactor (char* s, expand_t* pp, float sepfact)
     if ((i = sscanf(s, "%f,%f", &x, &y))) {
 	if (i == 1) y = x;
 	if (pp->doAdd) {
-	    pp->x = x/sepfact;
-	    pp->y = y/sepfact;
+	    if (sepfact > 1) {
+		pp->x = MIN(dflt,x/sepfact);
+		pp->y = MIN(dflt,y/sepfact);
+	    }
+	    else if (sepfact < 1) {
+		pp->x = MAX(dflt,x/sepfact);
+		pp->y = MAX(dflt,y/sepfact);
+	    }
+	    else {
+		pp->x = x;
+		pp->y = y;
+	    }
 	}
 	else {
 	    pp->x = 1.0 + x/sepfact;
@@ -1273,9 +1287,9 @@ sepFactor(graph_t* g)
     expand_t pmargin;
     char*  marg;
 
-    if ((marg = agget(g, "sep")) && parseFactor(marg, &pmargin, 1.0)) {
+    if ((marg = agget(g, "sep")) && parseFactor(marg, &pmargin, 1.0, 0)) {
     }
-    else if ((marg = agget(g, "esep")) && parseFactor(marg, &pmargin, SEPFACT)) {
+    else if ((marg = agget(g, "esep")) && parseFactor(marg, &pmargin, SEPFACT, DFLT_MARGIN)) {
     }
     else { /* default */
 	pmargin.x = pmargin.y = DFLT_MARGIN;
@@ -1299,9 +1313,9 @@ esepFactor(graph_t* g)
     expand_t pmargin;
     char*  marg;
 
-    if ((marg = agget(g, "esep")) && parseFactor(marg, &pmargin, 1.0)) {
+    if ((marg = agget(g, "esep")) && parseFactor(marg, &pmargin, 1.0, 0)) {
     }
-    else if ((marg = agget(g, "sep")) && parseFactor(marg, &pmargin, 1.0/SEPFACT)) {
+    else if ((marg = agget(g, "sep")) && parseFactor(marg, &pmargin, 1.0/SEPFACT, SEPFACT*DFLT_MARGIN)) {
     }
     else {
 	pmargin.x = pmargin.y = SEPFACT*DFLT_MARGIN;

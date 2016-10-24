@@ -3,12 +3,16 @@
 from AT&T Research and Lucent Bell Labs
 * http://www.graphviz.org/
 
-See doc/build.html for prerequisites and detailed build notes.
+See doc/build.html within the source tree or http://ellson.github.io/graphviz/doc/html/build.html for prerequisites and detailed build notes.
 
 ## master GIT Repository
 
 The master GIT Repository for graphviz can be found at:
 * http://github.com/ellson/graphviz/
+
+## Documentation
+
+The Graphviz documents are currently hosted at http://ellson.github.io/graphviz/doc/html/index.html
 
 ## Graph Visualization ( http://www.graphviz.org/About.php )
 
@@ -24,7 +28,7 @@ In practice, graphs are usually generated from an external data sources, but the
 
 ## Contacts
 
-If you have a bug or believe something is not working as expected, please submit a bug report ( http://www.graphviz.org/content/graphviz-issue-tracker ).
+If you have a bug or believe something is not working as expected, please submit a bug report ( https://github.com/ellson/graphviz/issues ).
 
 If you have a general question or are unsure how things work, please consider posting first to the Graphviz mailing list ( http://www.graphviz.org/MailingList.php ) or on the user forum ( http://www.graphviz.org/forums/general-discussion ). We follow these, but there are also many users who might be able to respond to you better or faster than we can. Please do not send detailed bug reports there.
 

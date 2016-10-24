@@ -26,14 +26,12 @@
 #define FPRECIS		6	/* default precision for floats         */
 
 
-#if __STD_C
+/**
+ * @param f file to print to
+ * @param form format to use
+ * @param args arg list if !argf
+ */
 int sfvprintf(Sfio_t * f, const char *form, va_list args)
-#else
-int sfvprintf(f, form, args)
-Sfio_t *f;			/* file to print to     */
-char *form;			/* format to use        */
-va_list args;			/* arg list if !argf    */
-#endif
 {
     reg int v = 0, n_s, base, fmt, flags;
     Sflong_t lv;
@@ -42,7 +40,7 @@ va_list args;			/* arg list if !argf    */
     int sign, decpt;
     ssize_t size;
     double dval;
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
     Sfdouble_t ldval;
 #endif
     char *tls[2], **ls;		/* for %..[separ]s              */
@@ -85,7 +83,7 @@ va_list args;			/* arg list if !argf    */
 #define SFwrite(f,s,n) \
 	{ if((endd-d) >= n) { MEMCPY(d,s,n); } \
 	  else \
-	  { SFEND(f); n_output += (w = SFWRITE(f,(Void_t*)s,n)) > 0 ? w : 0; SFBUF(f); \
+	  { SFEND(f); n_output += (w = SFWRITE(f,(void*)s,n)) > 0 ? w : 0; SFBUF(f); \
 	    if(n != w) goto done; \
 	  } \
 	}
@@ -182,7 +180,7 @@ va_list args;			/* arg list if !argf    */
 			    FMTSET(ft, form, args,
 				   LEFTP, 0, 0, 0, 0, 0, NIL(char *), 0);
 			    n = (*ft->extf)
-				(f, (Void_t *) & argv, ft);
+				(f, (void *) & argv, ft);
 			    if (n < 0)
 				goto pop_fmt;
 			    if (!(ft->flags & SFFMT_VALUE))
@@ -265,7 +263,7 @@ va_list args;			/* arg list if !argf    */
 	    else if (ft && ft->extf) {
 		FMTSET(ft, form, args, '.', dot, 0, 0, 0, 0, NIL(char *),
 		       0);
-		if ((*ft->extf) (f, (Void_t *) (&argv), ft) < 0)
+		if ((*ft->extf) (f, (void *) (&argv), ft) < 0)
 		    goto pop_fmt;
 		if (ft->flags & SFFMT_VALUE)
 		    v = argv.i;
@@ -327,7 +325,7 @@ va_list args;			/* arg list if !argf    */
 		else if (ft && ft->extf) {
 		    FMTSET(ft, form, args, 'I', sizeof(int), 0, 0, 0, 0,
 			   NIL(char *), 0);
-		    if ((*ft->extf) (f, (Void_t *) (&argv), ft) < 0)
+		    if ((*ft->extf) (f, (void *) (&argv), ft) < 0)
 			goto pop_fmt;
 		    if (ft->flags & SFFMT_VALUE)
 			size = argv.i;
@@ -403,7 +401,7 @@ va_list args;			/* arg list if !argf    */
 		   t_str, n_str);
 	    SFEND(f);
 	    SFOPEN(f, 0);
-	    v = (*ft->extf) (f, (Void_t *) (&argv), ft);
+	    v = (*ft->extf) (f, (void *) (&argv), ft);
 	    SFLOCK(f, 0);
 	    SFBUF(f);
 
@@ -434,7 +432,7 @@ va_list args;			/* arg list if !argf    */
 		    argv.i = va_arg(args, int);
 		break;
 	    case SFFMT_FLOAT:
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 		if (FMTCMP(size, Sfdouble_t, Sfdouble_t))
 		    argv.ld = va_arg(args, Sfdouble_t);
 		else
@@ -442,7 +440,7 @@ va_list args;			/* arg list if !argf    */
 		    argv.d = va_arg(args, double);
 		break;
 	    case SFFMT_POINTER:
-		argv.vp = va_arg(args, Void_t *);
+		argv.vp = va_arg(args, void *);
 		break;
 	    case SFFMT_BYTE:
 		if (base >= 0)
@@ -471,7 +469,7 @@ va_list args;			/* arg list if !argf    */
 		goto pop_fmt;
 	    if (!argv.ft->form && ft) {	/* change extension functions */
 		if (ft->eventf &&
-		    (*ft->eventf) (f, SF_DPOP, (Void_t *) form, ft) < 0)
+		    (*ft->eventf) (f, SF_DPOP, (void *) form, ft) < 0)
 		    continue;
 		fmstk->ft = ft = argv.ft;
 	    } else {		/* stack a new environment */
@@ -786,7 +784,7 @@ va_list args;			/* arg list if !argf    */
 	case 'e':
 	case 'E':
 	case 'f':
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 	    if (FMTCMP(size, Sfdouble_t, Sfdouble_t))
 		ldval = argv.ld;
 	    else
@@ -799,7 +797,7 @@ va_list args;			/* arg list if !argf    */
 
 	    if (fmt == 'e' || fmt == 'E') {
 		n = (precis = precis < 0 ? FPRECIS : precis) + 1;
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 		if (FMTCMP(size, Sfdouble_t, Sfdouble_t)) {
 		    ep = _sfcvt(&ldval, min(n, SF_FDIGITS),
 				&decpt, &sign,
@@ -813,7 +811,7 @@ va_list args;			/* arg list if !argf    */
 		goto e_format;
 	    } else if (fmt == 'f' || fmt == 'F') {
 		precis = precis < 0 ? FPRECIS : precis;
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 		if (FMTCMP(size, Sfdouble_t, Sfdouble_t)) {
 		    ep = _sfcvt(&ldval, min(precis, SF_FDIGITS),
 				&decpt, &sign, SFFMT_LDOUBLE);
@@ -828,7 +826,7 @@ va_list args;			/* arg list if !argf    */
 
 	    /* 'g' or 'G' format */
 	    precis = precis < 0 ? FPRECIS : precis == 0 ? 1 : precis;
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 	    if (FMTCMP(size, Sfdouble_t, Sfdouble_t)) {
 		ep = _sfcvt(&ldval, min(precis, SF_FDIGITS),
 			    &decpt, &sign, SFFMT_EFORMAT | SFFMT_LDOUBLE);
@@ -879,7 +877,7 @@ va_list args;			/* arg list if !argf    */
 
 	    /* build the exponent */
 	    ep = endep = buf + (sizeof(buf) - 1);
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 	    if (FMTCMP(size, Sfdouble_t, Sfdouble_t))
 		dval = ldval ? 1. : 0.;	/* so the below test works */
 #endif
@@ -1015,8 +1013,8 @@ va_list args;			/* arg list if !argf    */
     while ((fm = fmstk)) {	/* pop the format stack and continue */
 	if (fm->eventf) {
 	    if (!form || !form[0])
-		(*fm->eventf) (f, SF_FINAL, NIL(Void_t *), ft);
-	    else if ((*fm->eventf) (f, SF_DPOP, (Void_t *) form, ft) < 0)
+		(*fm->eventf) (f, SF_FINAL, NIL(void *), ft);
+	    else if ((*fm->eventf) (f, SF_DPOP, (void *) form, ft) < 0)
 		goto loop_fmt;
 	}
 
@@ -1039,7 +1037,7 @@ va_list args;			/* arg list if !argf    */
 	free(fp);
     while ((fm = fmstk)) {
 	if (fm->eventf)
-	    (*fm->eventf) (f, SF_FINAL, NIL(Void_t *), fm->ft);
+	    (*fm->eventf) (f, SF_FINAL, NIL(void *), fm->ft);
 	fmstk = fm->next;
 	free(fm);
     }
@@ -1053,7 +1051,7 @@ va_list args;			/* arg list if !argf    */
 
     if ((((flags = f->flags) & SF_SHARE) && !(flags & SF_PUBLIC)) ||
 	(n > 0 && (d == (uchar *) data || (flags & SF_LINE))))
-	(void) SFWRITE(f, (Void_t *) d, n);
+	(void) SFWRITE(f, (void *) d, n);
     else
 	f->next += n;
 

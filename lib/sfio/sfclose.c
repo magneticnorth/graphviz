@@ -18,15 +18,10 @@
 **	Written by Kiem-Phong Vo
 */
 
-#if __STD_C
 int sfclose(reg Sfio_t * f)
-#else
-int sfclose(f)
-reg Sfio_t *f;
-#endif
 {
     reg int local, ex, rv;
-    Void_t *data = NIL(Void_t *);
+    void *data = NIL(void *);
 
     SFMTXSTART(f, -1);
 
@@ -63,7 +58,7 @@ reg Sfio_t *f;
     /* raise discipline exceptions */
     if (f->disc
 	&& (ex =
-	    SFRAISE(f, local ? SF_NEW : SF_CLOSING, NIL(Void_t *))) != 0)
+	    SFRAISE(f, local ? SF_NEW : SF_CLOSING, NIL(void *))) != 0)
 	SFMTXRETURN(f, ex);
 
     if (!local && f->pool) {	/* remove from pool */
@@ -100,7 +95,7 @@ reg Sfio_t *f;
 	else
 #endif
 	if (f->flags & SF_MALLOC)
-	    data = (Void_t *) f->data;
+	    data = (void *) f->data;
 
 	f->data = NIL(uchar *);
 	f->size = -1;
@@ -139,7 +134,7 @@ reg Sfio_t *f;
     }
 
     if (!local) {
-	if (f->disc && (ex = SFRAISE(f, SF_FINAL, NIL(Void_t *))) != 0) {
+	if (f->disc && (ex = SFRAISE(f, SF_FINAL, NIL(void *))) != 0) {
 	    rv = ex;
 	    goto done;
 	}
@@ -148,7 +143,7 @@ reg Sfio_t *f;
 	    free(f);
 	else {
 	    f->disc = NIL(Sfdisc_t *);
-	    f->stdio = NIL(Void_t *);
+	    f->stdio = NIL(void *);
 	    f->mode = SF_AVAIL;
 	}
     }

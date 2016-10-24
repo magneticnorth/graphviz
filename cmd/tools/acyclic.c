@@ -27,9 +27,7 @@
 
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -48,17 +46,14 @@ typedef struct {
 #define ND_onstack(n) (((Agnodeinfo_t*)((n)->base.data))->onstack)
 #define graphName(g) (agnameof(g))
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 static FILE *inFile;
 static FILE *outFile;
 static int doWrite = 1;
 static int Verbose;
 static char *cmd;
+static int num_rev;
 
 /* addRevEdge:
  * Add a reversed version of e. The new edge has the same key.
@@ -73,12 +68,16 @@ static void addRevEdge(Agraph_t * g, Agedge_t * e)
 
     agcopyattr (e, f);
 
+    num_rev++;
     sym = agattr (g, AGEDGE, TAILPORT_ID, 0);
     if (sym) agsafeset (f, HEADPORT_ID, agxget (e, sym), "");
     sym = agattr (g, AGEDGE, HEADPORT_ID, 0);
     if (sym) agsafeset (f, TAILPORT_ID, agxget (e, sym), "");
 }
 
+/* dfs:
+ * Return the number of reversed edges for this component.
+ */
 static int dfs(Agraph_t * g, Agnode_t * t, int hasCycle)
 {
     Agedge_t *e;
@@ -104,7 +103,7 @@ static int dfs(Agraph_t * g, Agnode_t * t, int hasCycle)
 	    agdelete(g, e);
 	    hasCycle = 1;
 	} else if (ND_mark(h) == 0)
-	    hasCycle = dfs(g, h, hasCycle);
+	    hasCycle |= dfs(g, h, hasCycle);
     }
     ND_onstack(t) = 0;
     return hasCycle;
@@ -202,14 +201,14 @@ int main(int argc, char *argv[])
 	    }
 	    if (Verbose) {
 		if (rv)
-		    fprintf(stderr, "Graph %s has cycles\n", graphName(g));
+		    fprintf(stderr, "Graph \"%s\" has cycles; %d reversed edges\n", graphName(g), num_rev);
 		else
-		    fprintf(stderr, "Graph %s is acyclic\n", graphName(g));
+		    fprintf(stderr, "Graph \"%s\" is acyclic\n", graphName(g));
 	    }
 	} else {
-	    rv = 2;
+	    rv = -1;
 	    if (Verbose)
-		fprintf(stderr, "Graph %s is undirected\n", graphName(g));
+		fprintf(stderr, "Graph \"%s\" is undirected\n", graphName(g));
 	}
 	exit(rv);
     } else

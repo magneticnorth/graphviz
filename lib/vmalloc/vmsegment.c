@@ -18,20 +18,18 @@
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 02/07/95
 */
 
-#if __STD_C
-Void_t *vmsegment(Vmalloc_t * vm, Void_t * addr)
-#else
-Void_t *vmsegment(vm, addr)
-Vmalloc_t *vm;			/* region       */
-Void_t *addr;			/* address      */
-#endif
+/**
+ * @param vm region
+ * @param addr address
+ */
+void *vmsegment(Vmalloc_t * vm, void * addr)
 {
     reg Seg_t *seg;
     reg Vmdata_t *vd = vm->data;
 
     if (!(vd->mode & VM_TRUST)) {
 	if (ISLOCK(vd, 0))
-	    return NIL(Void_t *);
+	    return NIL(void *);
 	SETLOCK(vd, 0);
     }
 
@@ -41,5 +39,5 @@ Void_t *addr;			/* address      */
 	    break;
 
     CLRLOCK(vd, 0);
-    return seg ? (Void_t *) seg->addr : NIL(Void_t *);
+    return seg ? (void *) seg->addr : NIL(void *);
 }

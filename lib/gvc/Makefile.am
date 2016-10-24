@@ -36,9 +36,6 @@ libgvc_C_la_SOURCES = gvrender.c gvlayout.c gvdevice.c gvloadimage.c \
 	gvcontext.c gvjobs.c gvevent.c gvplugin.c gvconfig.c \
 	gvtextlayout.c gvusershape.c gvc.c
 #	gvbuffstderr.c
-if WITH_WIN32
-libgvc_C_la_SOURCES += regex_win32.c
-endif
 
 libgvc_C_la_LIBADD = \
 	$(top_builddir)/lib/pack/libpack_C.la \
@@ -68,9 +65,13 @@ libgvc_la_LIBADD = $(libgvc_C_la_LIBADD) \
 	$(EXPAT_LIBS) $(Z_LIBS) $(MATH_LIBS)
 libgvc_la_DEPENDENCIES = $(libgvc_C_la_DEPENDENCIES)
 
+if WITH_WIN32
+libgvc_la_LDFLAGS += -export-symbols $(top_srcdir)/lib/gvc.def
+endif
+
 gvc.3.pdf: $(srcdir)/gvc.3
 	- @GROFF@ -Tps -man $(srcdir)/gvc.3 | @PS2PDF@ - - > gvc.3.pdf
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) regex_win32.h regex_win32.c gvc.vcproj
+EXTRA_DIST = $(man_MANS) $(pdf_DATA)
 
 DISTCLEANFILES = $(pdf_DATA)

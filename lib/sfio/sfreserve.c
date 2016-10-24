@@ -18,21 +18,19 @@
 **	Written by Kiem-Phong Vo.
 */
 
-#if __STD_C
-Void_t *sfreserve(reg Sfio_t * f, ssize_t size, int type)
-#else
-Void_t *sfreserve(f, size, type)
-reg Sfio_t *f;			/* file to peek */
-ssize_t size;			/* size of peek */
-int type;			/* LOCKR: lock stream, LASTR: last record */
-#endif
+/**
+ * @param f file to peek
+ * @param size size of peek
+ * @param type LOCKR: lock stream, LASTR: last record
+ */
+void *sfreserve(reg Sfio_t * f, ssize_t size, int type)
 {
     reg ssize_t n, sz;
     reg Sfrsrv_t *rsrv;
-    reg Void_t *data;
+    reg void *data;
     reg int mode;
 
-    SFMTXSTART(f, NIL(Void_t *));
+    SFMTXSTART(f, NIL(void *));
 
     /* initialize io states */
     rsrv = NIL(Sfrsrv_t *);
@@ -43,17 +41,17 @@ int type;			/* LOCKR: lock stream, LASTR: last record */
 	if ((rsrv = f->rsrv) && (n = -rsrv->slen) > 0) {
 	    rsrv->slen = 0;
 	    _Sfi = f->val = n;
-	    SFMTXRETURN(f, (Void_t *) rsrv->data);
+	    SFMTXRETURN(f, (void *) rsrv->data);
 	} else
-	    SFMTXRETURN(f, NIL(Void_t *));
+	    SFMTXRETURN(f, NIL(void *));
     }
 
     if (type > 0 && !(type == SF_LOCKR || type == 1))
-	SFMTXRETURN(f, NIL(Void_t *));
+	SFMTXRETURN(f, NIL(void *));
 
     if ((sz = size) == 0 && type != 0) {	/* only return the current status and possibly lock stream */
 	if ((f->mode & SF_RDWR) != f->mode && _sfmode(f, 0, 0) < 0)
-	    SFMTXRETURN(f, NIL(Void_t *));
+	    SFMTXRETURN(f, NIL(void *));
 
 	SFLOCK(f, 0);
 	if ((n = f->endb - f->next) < 0)
@@ -124,7 +122,7 @@ int type;			/* LOCKR: lock stream, LASTR: last record */
 		n = sz;
 	} else {		/*if(f->mode&SF_READ) */
 	    if (type <= 0 && (rsrv = _sfrsrv(f, sz)) &&
-		(n = SFREAD(f, (Void_t *) rsrv->data, sz)) < sz)
+		(n = SFREAD(f, (void *) rsrv->data, sz)) < sz)
 		rsrv->slen = -n;
 	}
     }
@@ -136,13 +134,13 @@ int type;			/* LOCKR: lock stream, LASTR: last record */
     SFOPEN(f, 0);
 
     if ((sz > 0 && n < sz) || (n == 0 && type <= 0))
-	SFMTXRETURN(f, NIL(Void_t *));
+	SFMTXRETURN(f, NIL(void *));
 
-    if ((data = rsrv ? (Void_t *) rsrv->data : (Void_t *) f->next)) {
+    if ((data = rsrv ? (void *) rsrv->data : (void *) f->next)) {
 	if (type > 0) {
 	    f->mode |= SF_PEEK;
 	    f->endr = f->endw = f->data;
-	} else if (data == (Void_t *) f->next)
+	} else if (data == (void *) f->next)
 	    f->next += (size >= 0 ? size : n);
     }
 

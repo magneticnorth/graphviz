@@ -40,9 +40,7 @@
  *         erik@sra.co.jp
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 #include <stdio.h>
 
 #ifdef SEL_FILE_IGNORE_CASE
@@ -60,18 +58,11 @@ extern uid_t getuid ();
 extern void qsort ();
 #endif /* defined (SVR4) || defined (SYSV) || defined (USG) */
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #include "SFDecls.h"
 
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #ifdef HAVE_INTPTR_T
 #define INT2PTR(t,v) ((t)(intptr_t)(v))
 #define PTR2INT(v) ((Sflong_t)(intptr_t)(v))

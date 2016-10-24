@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <partition.h>
 #include <trap.h>
@@ -209,7 +207,7 @@ get_vertex_positions (int v0, int v1, int *ip, int *iq)
   vertexchain_t *vp0, *vp1;
   register int i;
   double angle, temp;
-  int tp, tq;
+  int tp = 0, tq = 0;
 
   vp0 = &vert[v0];
   vp1 = &vert[v1];
@@ -655,6 +653,8 @@ monotonate_trapezoids(int nsegs, segment_t*seg, trap_t* tr,
 	size = traverse_polygon (visited, decomp, 0, seg, tr, 0, tr_start, tr[tr_start].u0, flip, TR_FROM_UP);
     else if (tr[tr_start].d0 > 0)
 	size = traverse_polygon (visited, decomp, 0, seg, tr, 0, tr_start, tr[tr_start].d0, flip, TR_FROM_DN);
+    else
+	size = 0;
   
     free (visited);
     free (mchain);
@@ -685,7 +685,7 @@ rectIntersect (boxf *d, const boxf *r0, const boxf *r1)
     return 1;
 }
 
-#ifdef DEBUG
+#if DEBUG > 1
 static void
 dumpTrap (trap_t* tr, int n)
 {

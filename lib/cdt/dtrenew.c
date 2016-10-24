@@ -6,22 +6,16 @@
 **	Written by Kiem-Phong Vo (5/25/96)
 */
 
-#if __STD_C
-Void_t* dtrenew(Dt_t* dt, reg Void_t* obj)
-#else
-Void_t* dtrenew(dt, obj)
-Dt_t*		dt;
-reg Void_t*	obj;
-#endif
+void* dtrenew(Dt_t* dt, reg void* obj)
 {
-	reg Void_t*	key;
+	reg void*	key;
 	reg Dtlink_t	*e, *t, **s;
 	reg Dtdisc_t*	disc = dt->disc;
 
 	UNFLATTEN(dt);
 
 	if(!(e = dt->data->here) || _DTOBJ(e,disc->link) != obj)
-		return NIL(Void_t*);
+		return NIL(void*);
 
 	if(dt->data->type&(DT_STACK|DT_QUEUE|DT_LIST))
 		return obj;
@@ -54,5 +48,5 @@ reg Void_t*	obj;
 	}
 
 	dt->data->size -= 1;
-	return (*dt->meth->searchf)(dt,(Void_t*)e,DT_RENEW) ? obj : NIL(Void_t*);
+	return (*dt->meth->searchf)(dt,(void*)e,DT_RENEW) ? obj : NIL(void*);
 }

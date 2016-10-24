@@ -23,16 +23,14 @@ static char *Inf = "Inf", *Zero = "0";
 #define SF_INFINITE	((_Sfi = 3), Inf)
 #define SF_ZERO		((_Sfi = 1), Zero)
 
-#if __STD_C
-char *_sfcvt(Void_t * dv, int n_digit, int *decpt, int *sign, int format)
-#else
-char *_sfcvt(dv, n_digit, decpt, sign, format)
-Void_t *dv;			/* value to convert             */
-int n_digit;			/* number of digits wanted      */
-int *decpt;			/* to return decimal point      */
-int *sign;			/* to return sign               */
-int format;			/* conversion format            */
-#endif
+/**
+ * @param dv value to convert
+ * @param n_digit number of digits wanted
+ * @param decpt return decimal point
+ * @param sign return sign
+ * @param format conversion format
+ */
+char *_sfcvt(void * dv, int n_digit, int *decpt, int *sign, int format)
 {
     reg char *sp;
     reg long n, v;
@@ -45,7 +43,7 @@ int format;			/* conversion format            */
 
     *sign = *decpt = 0;
 
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
     if (format & SFFMT_LDOUBLE) {
 	Sfdouble_t dval = *((Sfdouble_t *) dv);
 

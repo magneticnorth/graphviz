@@ -17,7 +17,7 @@
 **	Written by Kiem-Phong Vo.
 */
 
-#if _PACKAGE_ast
+#if defined(_PACKAGE_ast)
 #include	<proc.h>
 #else
 
@@ -32,12 +32,7 @@
 static char Meta[1 << CHAR_BIT], **Path;
 
 /* execute command directly if possible; else use the shell */
-#if __STD_C
 static void execute(const char *argcmd)
-#else
-static void execute(argcmd)
-char *argcmd;
-#endif
 {
     reg char *s, *cmd, **argv, **p, *interp;
     reg int n;
@@ -123,19 +118,17 @@ char *argcmd;
     _exit(EXIT_NOTFOUND);
 }
 
-#endif /*_PACKAGE_ast*/
+#endif /*defined(_PACKAGE_ast)*/
 
 #ifndef WIN32
-#if __STD_C
+/**
+ * @param f
+ * @param command command to execute
+ * @param mode mode of the stream
+ */
 Sfio_t *sfpopen(Sfio_t * f, const char *command, const char *mode)
-#else
-Sfio_t *sfpopen(f, command, mode)
-Sfio_t *f;
-char *command;			/* command to execute */
-char *mode;			/* mode of the stream */
-#endif
 {
-#if _PACKAGE_ast
+#if defined(_PACKAGE_ast)
     reg Proc_t *proc;
     reg int sflags;
     reg long flags;
@@ -162,7 +155,7 @@ char *mode;			/* mode of the stream */
     av[3] = 0;
     if (!(proc = procopen(0, av, 0, 0, flags)))
 	return 0;
-    if (!(f = sfnew(f, NIL(Void_t *), (size_t) SF_UNBOUND,
+    if (!(f = sfnew(f, NIL(void *), (size_t) SF_UNBOUND,
 		    (sflags & SF_READ) ? proc->rfd : proc->wfd, sflags)) ||
 	((f->bits |= bits),
 	 _sfpopen(f, (sflags & SF_READ) ? proc->wfd : -1, proc->pid)) < 0)
@@ -220,7 +213,7 @@ char *mode;			/* mode of the stream */
 	/* make the streams */
 	if (!
 	    (f =
-	     sfnew(f, NIL(Void_t *), (size_t) SF_UNBOUND, parent[pkeep],
+	     sfnew(f, NIL(void *), (size_t) SF_UNBOUND, parent[pkeep],
 		   sflags)))
 	    goto error;
 	CLOSE(parent[!pkeep]);
@@ -292,6 +285,6 @@ char *mode;			/* mode of the stream */
 	}
 	return NIL(Sfio_t *);
     }
-#endif /*_PACKAGE_ast*/
+#endif /*defined(_PACKAGE_ast)*/
 }
 #endif

@@ -12,9 +12,7 @@
  *************************************************************************/
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "neato.h"
 #include "adjust.h"
@@ -154,7 +152,7 @@ static void mapGraphs(graph_t * g, graph_t * cg, distfn dist)
     }
 }
 
-#ifdef DEBUG
+#if DEBUG > 1
 static int
 indegree (graph_t * g, node_t *n)
 {

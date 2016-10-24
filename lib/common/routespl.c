@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "render.h"
 #include "pathplan.h"
@@ -64,6 +62,7 @@ static void printboxes(int boxn, boxf* boxes)
     Show_boxes[Show_cnt+1] = NULL;
 }
 
+#if DEBUG > 1
 static void psprintpolypts(Ppoint_t * p, int sz)
 {
     int i;
@@ -98,6 +97,7 @@ static void psprintpointf(pointf p)
 	    p.x, p.y);
     fprintf(stderr, "grestore\n");
 }
+#endif
 
 static void psprintspline(Ppolyline_t spl)
 {
@@ -942,7 +942,7 @@ makeStraightEdge(graph_t * g, edge_t * e, int et, splineInfo* sinfo)
 
     e_cnt = 1;
     e0 = e;
-    while ((e0 = ED_to_virt(e0))) e_cnt++;
+    while ((e0 != ED_to_virt(e0)) && (e0 = ED_to_virt(e0))) e_cnt++;
 
     if (e_cnt <= MAX_EDGE)
 	edges = elist;

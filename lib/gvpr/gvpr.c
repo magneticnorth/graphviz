@@ -19,9 +19,7 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
@@ -41,9 +39,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <setjmp.h>
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
 #ifndef DFLT_GVPRPATH
 #define DFLT_GVPRPATH    "."
@@ -1045,7 +1041,6 @@ int gvpr (int argc, char *argv[], gvpropts * uopts)
 		    state->curgraph = (Agraph_t*)clone (0, (Agobj_t*)(state->curgraph));
 		state->curobj = (Agobj_t *) state->curgraph;
 		state->tvroot = 0;
-		state->tvt = TV_flat;
 		if (bp->begg_stmt)
 		    exeval(xprog->prog, bp->begg_stmt, state);
 

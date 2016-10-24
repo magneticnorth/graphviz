@@ -25,6 +25,7 @@ else
 bin_PROGRAMS = gc gvcolor gxl2gv acyclic nop ccomps sccmap tred \
 	unflatten gvpack dijkstra bcomps mm2gv gvgen gml2gv gv2gml graphml2gv
 endif
+
 man_MANS = gc.1 gvcolor.1 gxl2gv.1 acyclic.1 nop.1 ccomps.1 sccmap.1 \
 	tred.1 unflatten.1 gvpack.1 dijkstra.1 bcomps.1 mm2gv.1 gvgen.1 gml2gv.1 graphml2gv.1
 pdf_DATA = gc.1.pdf gvcolor.1.pdf gxl2gv.1.pdf acyclic.1.pdf \
@@ -174,6 +175,8 @@ mm2gv_SOURCES = mm2gv.c matrix_market.c mmio.c
 mm2gv_LDADD = \
 	$(top_builddir)/lib/sparse/libsparse_C.la \
     $(top_builddir)/lib/common/libcommon_C.la \
+    $(top_builddir)/lib/gvc/libgvc_C.la \
+    $(top_builddir)/lib/pathplan/libpathplan_C.la \
 	$(top_builddir)/lib/cgraph/libcgraph.la @MATH_LIBS@
 
 mm2gv.1.pdf: mm2gv.1
@@ -188,10 +191,14 @@ gv2gml_LDADD = \
 gml2gv_SOURCES = gml2gv.c gmlparse.y gmlscan.l
 
 gmlparse.c: y.tab.c
-	@SED@ "s/yy/gml/g" < y.tab.c > gmlparse.c
+	@SED@ "s/yy/gml/g" < y.tab.c | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+                @SED@ "s/unsigned long/uint64_t/g"  > gmlparse.c
 
 gmlparse.h: y.tab.h
-	@SED@ "s/yy/gml/g" < y.tab.h > gmlparse.h
+	@SED@ "s/yy/gml/g" < y.tab.h | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+                @SED@ "s/unsigned long/uint64_t/g"  > gmlparse.h
 
 y.tab.c y.tab.h : y.output
 
@@ -240,12 +247,15 @@ gvgen_LDADD = \
 gvgen.1.pdf: $(srcdir)/gvgen.1
 	- @GROFF@ -Tps -man $(srcdir)/gvgen.1 | @PS2PDF@ - - >gvgen.1.pdf
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) bcomps.vcproj \
-	acyclic.vcproj bcomps.vcproj ccomps.vcproj dijkstra.vcproj gc.vcproj \
-	gv2gxl.vcproj gvcolor.vcproj gvgen.vcproj gvpack.vcproj gxl2gv.vcproj \
-	mm2gv.vcproj nop.vcproj sccmap.vcproj tred.vcproj unflatten.vcproj \
-	gmlscan.c gmlparse.c gmlparse.h y.output y.tab.c y.tab.h gml2gv.vcproj \
-	graphml2gv.vcproj gv2gml.vcproj
+EXTRA_DIST = $(man_MANS) $(pdf_DATA) bcomps.vcxproj* \
+	acyclic.vcxproj* bcomps.vcxproj* ccomps.vcxproj* dijkstra.vcxproj* gc.vcxproj* \
+    gvcolor.vcxproj* gvgen.vcxproj* gvpack.vcxproj* gxl2gv.vcxproj* \
+	mm2gv.vcxproj* nop.vcxproj* sccmap.vcxproj* tred.vcxproj* unflatten.vcxproj* \
+	gmlscan.c gmlparse.c gmlparse.h y.output y.tab.c y.tab.h gml2gv.vcxproj* \
+	graphml2gv.vcxproj* gv2gml.vcxproj*
+
+# FIXME - these are missing
+#	gv2gxl.vcxproj*
 		
 CLEANFILES = stamp.h 
 

@@ -15,9 +15,7 @@
  * Tapered edges, based on lines.ps written by Denis Moskowitz.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -226,7 +224,9 @@ static vararr_t* pathtolines (bezier* bez, double initwid)
 	}
     }
     fixArr (arr);
-    /* printArr (arr, stderr); */
+#ifdef DEBUG
+    printArr (arr, stderr);
+#endif
     return arr;
 }
 

@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stddef.h>
 #include <string.h>
@@ -28,11 +26,9 @@
 #define GLOB_NOMATCH    3   /* No matches found.  */
 #define GLOB_NOSORT     4
 #define DMKEY "Software\\Microsoft" //key to look for library dir
-#include "regex_win32.h"
-#else
-#include <regex.h>
 #endif
 
+#include <regex.h>
 #include "types.h"
 #include "logic.h"
 #include "memory.h"
@@ -547,7 +543,7 @@ static void pdf_size (usershape_t *us)
     }
 }
 
-static void usershape_close (Dict_t * dict, Void_t * p, Dtdisc_t * disc)
+static void usershape_close (Dict_t * dict, void * p, Dtdisc_t * disc)
 {
     usershape_t *us = (usershape_t *)p;
 

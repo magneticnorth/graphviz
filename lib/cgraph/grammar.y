@@ -64,6 +64,7 @@ static void applyattrs(void *obj);
 static void endgraph(void);
 static void endnode(void);
 static void endedge(void);
+static void freestack(void);
 static char* concat(char*, char*);
 static char* concatPort(char*, char*);
 
@@ -94,8 +95,8 @@ static gstack_t *S;
 
 %%
 
-graph		:  hdr body {endgraph();}
-			|  error	{if (G) {agclose(G); G = Ag_G_global = NIL(Agraph_t*);}}
+graph		:  hdr body {freestack(); endgraph();}
+			|  error	{if (G) {freestack(); endgraph(); agclose(G); G = Ag_G_global = NIL(Agraph_t*);}}
 			|  /* empty */
 			;
 
@@ -335,7 +336,7 @@ static void nomacros(void)
 static void attrstmt(int tkind, char *macroname)
 {
 	item			*aptr;
-	int				kind;
+	int				kind = 0;
 	Agsym_t*  sym;
 
 		/* creating a macro def */
@@ -451,7 +452,7 @@ concat (char* s1, char* s2)
   char*  s;
   char   buf[BUFSIZ];
   char*  sym;
-  int    len = strlen(s1) + strlen(s2) + 1;
+  size_t len = strlen(s1) + strlen(s2) + 1;
 
   if (len <= BUFSIZ) sym = buf;
   else sym = (char*)malloc(len);
@@ -472,7 +473,7 @@ concatPort (char* s1, char* s2)
   char*  s;
   char   buf[BUFSIZ];
   char*  sym;
-  int    len = strlen(s1) + strlen(s2) + 2;  /* one more for ':' */
+  size_t len = strlen(s1) + strlen(s2) + 2;  /* one more for ':' */
 
   if (len <= BUFSIZ) sym = buf;
   else sym = (char*)malloc(len);
@@ -569,6 +570,16 @@ static void closesubg()
 	S = pop(S);
 	S->subg = subg;
 	assert(subg);
+}
+
+static void freestack()
+{
+	while (S) {
+		deletelist(&(S->nodelist));
+		deletelist(&(S->attrlist));
+		deletelist(&(S->edgelist));
+		S = pop(S);
+	}
 }
 
 extern FILE *yyin;

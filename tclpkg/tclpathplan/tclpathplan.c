@@ -18,9 +18,7 @@
  * ellson@graphviz.org   October 2nd, 1996
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 /* avoid compiler warnings with template changes in Tcl8.4 */
 /*    specifically just the change to Tcl_CmdProc */
@@ -29,16 +27,12 @@
 /* for sincos */
 #define _GNU_SOURCE 1
 
-#ifdef HAVE_AST
-#include                <ast.h>
-#include                <vmalloc.h>
-#else
 #include                <sys/types.h>
 #include                <stdlib.h>
 #include                <string.h>
 #include                <unistd.h>
-#endif
 
+#include <inttypes.h>
 #include <assert.h>
 #include <math.h>
 #include <pathutil.h>
@@ -205,7 +199,7 @@ void triangle_callback(void *vgparg, point pqr[])
 
     if (vgp->triangle_cmd) {
 	sprintf(vbuf, "vgpane%lu",
-		(unsigned long) (((ubyte_pt) vgp - (vgpaneTable->bodyPtr))
+		(uint64_t) (((ubyte_pt) vgp - (vgpaneTable->bodyPtr))
 				 / (vgpaneTable->entrySize)));
 	expandPercentsEval(vgp->interp, vgp->triangle_cmd, vbuf, 3, pqr);
     }
@@ -220,7 +214,7 @@ static char *buildBindings(char *s1, char *s2)
  */
 {
     char *s3;
-    int l;
+    size_t l;
 
     if (s2[0] == '+') {
 	if (s1) {
@@ -412,7 +406,7 @@ static int
 vgpanecmd(ClientData clientData, Tcl_Interp * interp, int argc,
 	  char *argv[])
 {
-    int vargc, length, i, j, n, result;
+    int vargc, i, j, n, result;
     char c, *s, **vargv, vbuf[30];
     vgpane_t *vgp, **vgpp;
     point p, q, *ps;
@@ -438,7 +432,7 @@ vgpanecmd(ClientData clientData, Tcl_Interp * interp, int argc,
     vgp = *vgpp;
 
     c = argv[1][0];
-    length = strlen(argv[1]);
+    size_t length = strlen(argv[1]);
 
     if ((c == 'c') && (strncmp(argv[1], "coords", length) == 0)) {
 	if ((argc < 3)) {

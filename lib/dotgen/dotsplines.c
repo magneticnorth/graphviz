@@ -256,8 +256,8 @@ static void _dot_splines(graph_t * g, int normalize)
     node_t *n;
     Agedgeinfo_t fwdedgeai, fwdedgebi;
     Agedgepair_t fwdedgea, fwdedgeb;
-    edge_t *e, *e0, *e1, *ea, *eb, *le0, *le1, **edges;
-    path *P;
+    edge_t *e, *e0, *e1, *ea, *eb, *le0, *le1, **edges = NULL;
+    path *P = NULL;
     spline_info_t sd;
     int et = EDGE_TYPE(g);
     fwdedgea.out.base.data = (Agrec_t*)&fwdedgeai;
@@ -413,7 +413,19 @@ static void _dot_splines(graph_t * g, int normalize)
 	}
 
 	if (et == ET_CURVED) {
-	    makeStraightEdges (g, edges+ind, cnt, et, &sinfo);
+	    int ii;
+	    edge_t* e0;
+	    edge_t** edgelist;
+	    if (cnt == 1)
+		edgelist = &e0;
+	    else
+		edgelist = N_NEW(cnt, edge_t*);
+	    edgelist[0] = getmainedge((edges+ind)[0]);
+	    for (ii = 1; ii < cnt; ii++)
+		edgelist[ii] = (edges+ind)[ii];
+	    makeStraightEdges (g, edgelist, cnt, et, &sinfo);
+	    if (cnt > 1)
+		free (edgelist);
 	}
 	else if (agtail(e0) == aghead(e0)) {
 	    int b, sizey, r;
@@ -976,7 +988,7 @@ makeSimpleFlatLabels (node_t* tn, node_t* hn, edge_t** edges, int ind, int cnt, 
     int i, pointn;
     double leftend, rightend, ctrx, ctry, miny, maxy;
     double uminx, umaxx;
-    double lminx, lmaxx;
+    double lminx=0.0, lmaxx=0.0;
 
     edge_t** earray = N_NEW(cnt, edge_t*);
 

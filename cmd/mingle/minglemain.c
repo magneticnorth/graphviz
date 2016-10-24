@@ -8,9 +8,7 @@
  *
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef WIN32 /*dependencies*/
     #pragma comment( lib, "cgraph.lib" )
@@ -28,11 +26,7 @@
 #include <agxbuf.h>
 #include <ingraphs.h>
 #include <pointset.h>
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 
 #include "DotIO.h"
 #include "edge_bundling.h"
@@ -493,10 +487,12 @@ bundle (Agraph_t* g, opts_t* opts)
 
 	edges = edge_bundling(A, 2, x, opts->outer_iter, opts->K, opts->method, opts->nneighbors, opts->compatibility_method, opts->max_recursion, opts->angle_param, opts->angle, 0);
 	
-	if (opts->fmt == FMT_GV)
-    	export_dot (outfile, A->m, edges, g);
-    else
-    	pedge_export_gv(outfile, A->m, edges);
+	if (opts->fmt == FMT_GV) {
+	    	export_dot (outfile, A->m, edges, g);
+	}
+	else {
+		pedge_export_gv(outfile, A->m, edges);
+	}
 	return rv;
 }
 

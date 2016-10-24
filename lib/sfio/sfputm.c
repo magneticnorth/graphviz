@@ -18,14 +18,12 @@
 **	Written by Kiem-Phong Vo.
 */
 
-#if __STD_C
+/**
+ * @param f write a portable ulong to this stream
+ * @param v the unsigned value to be written
+ * @param max the max value of the range
+ */
 int _sfputm(reg Sfio_t * f, Sfulong_t v, Sfulong_t max)
-#else
-int _sfputm(f, v, max)
-reg Sfio_t *f;			/* write a portable ulong to this stream */
-Sfulong_t v;			/* the unsigned value to be written */
-Sfulong_t max;			/* the max value of the range */
-#endif
 {
 #define N_ARRAY		(2*sizeof(Sfulong_t))
     reg uchar *s, *ps;
@@ -48,7 +46,7 @@ Sfulong_t max;			/* the max value of the range */
     n = (ps - s) + 1;
 
     if (n > 8 || SFWPEEK(f, ps, p) < n)
-	n = SFWRITE(f, (Void_t *) s, n);	/* write the hard way */
+	n = SFWRITE(f, (void *) s, n);	/* write the hard way */
     else {
 	switch (n) {
 	case 8:

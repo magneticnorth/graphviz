@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -23,7 +21,9 @@
 #ifdef HAVE_PANGOCAIRO
 #ifdef HAVE_RSVG
 #include <librsvg/rsvg.h>
+#ifndef RSVG_CAIRO_H
 #include <librsvg/rsvg-cairo.h>
+#endif
 #include <cairo/cairo-svg.h>
 
 #ifdef WIN32
@@ -73,8 +73,12 @@ static RsvgHandle* gvloadimage_rsvg_load(GVJ_t * job, usershape_t *us)
         switch (us->type) {
             case FT_SVG:
 
+
 #if HAVE_G_TYPE_INIT
+/* g_type_init() was deprecated in glib 2.36.0 */
+#if !GLIB_CHECK_VERSION (2, 36, 0)
 		g_type_init();
+#endif
 #else
 		rsvg_init();
 #endif
@@ -86,7 +90,9 @@ static RsvgHandle* gvloadimage_rsvg_load(GVJ_t * job, usershape_t *us)
 #if HAVE_G_TYPE_TERM
 			g_type_term();
 #else
+#ifndef HAVE_SVG_2_36
 			rsvg_term();
+#endif
 #endif
 			return NULL;
 		} 
@@ -106,7 +112,9 @@ static RsvgHandle* gvloadimage_rsvg_load(GVJ_t * job, usershape_t *us)
 #if HAVE_G_TYPE_TERM
 			g_type_term();
 #else
-			rsvg_term();
+#ifndef HAVE_SVG_2_36
+                        rsvg_term();
+#endif
 #endif
 			return NULL;
 		}
@@ -123,7 +131,9 @@ static RsvgHandle* gvloadimage_rsvg_load(GVJ_t * job, usershape_t *us)
 #if HAVE_G_TYPE_TERM
 			g_type_term();
 #else
-			rsvg_term();
+#ifndef HAVE_SVG_2_36
+                        rsvg_term();
+#endif
 #endif
 			return NULL;
 		}
@@ -139,7 +149,9 @@ static RsvgHandle* gvloadimage_rsvg_load(GVJ_t * job, usershape_t *us)
 #if HAVE_G_TYPE_TERM
 			g_type_term();
 #else
-			rsvg_term();
+#ifndef HAVE_SVG_2_36
+                        rsvg_term();
+#endif
 #endif
 			return NULL;
 		} 

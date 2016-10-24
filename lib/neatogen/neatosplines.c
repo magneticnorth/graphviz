@@ -12,9 +12,7 @@
  *************************************************************************/
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "neato.h"
 #include "adjust.h"
@@ -278,7 +276,7 @@ Ppoly_t *makeObstacle(node_t * n, expand_t* pmargin, boolean isOrtho)
     field_t *fld;
     epsf_t *desc;
     int isPoly;
-    pointf* verts;
+    pointf* verts = NULL;
     pointf vs[4];
     pointf p;
     pointf margin;
@@ -558,9 +556,12 @@ static int _spline_edges(graph_t * g, expand_t* pmargin, int edgetype)
     vconfig_t *vconfig = 0;
     path *P = NULL;
     int useEdges = (Nop > 1);
-    router_t* rtr = 0;
     int legal = 0;
 
+#ifdef HAVE_GTS
+    router_t* rtr = 0;
+#endif
+    
     /* build configuration */
     if (edgetype >= ET_PLINE) {
 	obs = N_NEW(agnnodes(g), Ppoly_t *);

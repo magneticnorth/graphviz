@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +29,7 @@
     #pragma comment( lib, "glib-2.0.lib" )
     #pragma comment( lib, "pango-1.0.lib" )
     #pragma comment( lib, "pangocairo-1.0.lib" )
-    #pragma comment( lib, "cairo.lib" )
+    #pragma comment( lib, "libcairo-2.lib" )
     #pragma comment( lib, "gobject-2.0.lib" )
     #pragma comment( lib, "graph.lib" )
     #pragma comment( lib, "webp.lib" )

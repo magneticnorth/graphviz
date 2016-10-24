@@ -118,7 +118,7 @@ int Pobspath(vconfig_t * config, Ppoint_t p0, int poly0, Ppoint_t p1,
 	     int poly1, Ppolyline_t * output_route)
 {
     int i, j, *dad;
-    int opn;
+    size_t opn;
     Ppoint_t *ops;
     COORD *ptvis0, *ptvis1;
 
@@ -239,6 +239,8 @@ static void printDad(int *vis, int n)
 }
 #endif
 
+#ifdef GASP
+
 static Ppoint_t Bezpt[1000];
 static int Bezctr;
 
@@ -296,8 +298,6 @@ static void append_bezier(Ppoint_t * bezier)
 	append_bezier(right);
     }
 }
-
-#ifdef GASP
 
 FILE *GASPout = stderr;
 

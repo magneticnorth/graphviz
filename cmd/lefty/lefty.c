@@ -13,9 +13,7 @@
 
 /* Lefteris Koutsofios - AT&T Labs Research */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #define LEFTYVERSION "10 Mar 2005"
 
@@ -23,7 +21,7 @@
 #include "common.h"
 #include "g.h"
 #include "code.h"
-#include "io.h"
+#include "leftyio.h"
 #include "mem.h"
 #include "tbl.h"
 #include "parse.h"

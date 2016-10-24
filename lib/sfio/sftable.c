@@ -18,13 +18,7 @@
 **	Written by Kiem-Phong Vo.
 */
 
-#if __STD_C
 static char *sffmtint(const char *str, int *v)
-#else
-static char *sffmtint(str, v)
-char *str;
-int *v;
-#endif
 {
     for (*v = 0; isdigit(*str); ++str)
 	*v = *v * 10 + (*str - '0');
@@ -32,16 +26,8 @@ int *v;
     return (char *) str;
 }
 
-#if __STD_C
 static Fmtpos_t *sffmtpos(Sfio_t * f, const char *form, va_list args,
 			  int type)
-#else
-static Fmtpos_t *sffmtpos(f, form, args, type)
-Sfio_t *f;
-char *form;
-va_list args;
-int type;
-#endif
 {
     int base, fmt, flags, dot, width, precis;
     ssize_t n_str, size = 0;
@@ -336,7 +322,7 @@ int type;
 	    memcpy(ft, &fp[n].ft, sizeof(Sffmt_t));
 	    va_copy(ft->args, args);
 	    ft->flags |= SFFMT_ARGPOS;
-	    v = (*ft->extf) (f, (Void_t *) (&fp[n].argv), ft);
+	    v = (*ft->extf) (f, (void *) (&fp[n].argv), ft);
 	    va_copy(args, ft->args);
 	    memcpy(&fp[n].ft, ft, sizeof(Sffmt_t));
 	    if (v < 0) {
@@ -362,7 +348,7 @@ int type;
 		if (ft)
 		    memcpy(&savft, ft, sizeof(Sffmt_t));
 	    } else if (type > 0)	/* from sfvscanf */
-		fp[n].argv.vp = va_arg(args, Void_t *);
+		fp[n].argv.vp = va_arg(args, void *);
 	    else
 		switch (_Sftype[fp[n].ft.fmt]) {
 		case SFFMT_INT:
@@ -378,7 +364,7 @@ int type;
 			fp[n].argv.i = va_arg(args, int);
 		    break;
 		case SFFMT_FLOAT:
-#if !_ast_fltmax_double
+#if !defined(_ast_fltmax_double)
 		    if (FMTCMP(size, Sfdouble_t, Sfdouble_t))
 			fp[n].argv.ld = va_arg(args, Sfdouble_t);
 		    else
@@ -386,7 +372,7 @@ int type;
 			fp[n].argv.d = va_arg(args, double);
 		    break;
 		case SFFMT_POINTER:
-		    fp[n].argv.vp = va_arg(args, Void_t *);
+		    fp[n].argv.vp = va_arg(args, void *);
 		    break;
 		case SFFMT_BYTE:
 		    if (fp[n].ft.base >= 0)

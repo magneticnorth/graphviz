@@ -11,20 +11,18 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stddef.h>
 #include <intset.h>
 #include <memory.h>
 
-static Void_t*
+static void*
 mkIntItem(Dt_t* d,intitem* obj,Dtdisc_t* disc)
 { 
     intitem* np = NEW(intitem);
     np->id = obj->id;
-    return (Void_t*)np;
+    return (void*)np;
 }
 
 static void

@@ -17,18 +17,13 @@
 **	Any required functions for process exiting.
 **	Written by Kiem-Phong Vo, kpv@research.att.com (05/25/93).
 */
-#if _PACKAGE_ast || _lib_atexit
+#if defined(_PACKAGE_ast) || _lib_atexit
 int Vm_atexit_already_defined;
 #else
 
 #if _lib_onexit
 
-#if __STD_C
 int atexit(void (*exitf) (void))
-#else
-int atexit(exitf)
-void (*exitf) ();
-#endif
 {
     return onexit(exitf);
 }
@@ -37,16 +32,11 @@ void (*exitf) ();
 
 typedef struct _exit_s {
     struct _exit_s *next;
-    void (*exitf) _ARG_((void));
+    void (*exitf)(void);
 } Exit_t;
 static Exit_t *Exit;
 
-#if __STD_C
 atexit(void (*exitf) (void))
-#else
-atexit(exitf)
-void (*exitf) ();
-#endif
 {
     Exit_t *e;
 
@@ -58,12 +48,7 @@ void (*exitf) ();
     return 0;
 }
 
-#if __STD_C
 void exit(int type)
-#else
-void exit(type)
-int type;
-#endif
 {
     Exit_t *e;
 

@@ -19,9 +19,7 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -63,7 +61,7 @@ static int iofread(void *chan, char *buf, int bufsize)
     return read(sffileno((Sfio_t *) chan), buf, bufsize);
 }
 
-static int ioputstr(void *chan, char *str)
+static int ioputstr(void *chan, const char *str)
 {
     return sfputr((Sfio_t *) chan, str, -1);
 }
@@ -82,7 +80,7 @@ main (int argc, char* argv[])
 {
     Agraph_t* gs[2];
     Agraph_t* g = agread (sfstdin, &gprDisc);
-    int rv, i;
+    int rv;
     gvpropts opts;
 
     gs[0] = g;

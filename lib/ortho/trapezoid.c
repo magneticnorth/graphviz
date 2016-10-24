@@ -12,14 +12,14 @@
  *************************************************************************/
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#ifndef __USE_ISOC99
 #define __USE_ISOC99
+#endif
 #include <math.h>
 #include <geom.h>
 #include <logic.h>
@@ -63,7 +63,7 @@ static int QSIZE;
 static int TRSIZE;
 
 /* Return a new node to be added into the query tree */
-static int newnode()
+static int newnode(void)
 {
     if (q_idx < QSIZE)
 	return q_idx++;
@@ -431,7 +431,7 @@ add_segment (int segnum, segment_t* seg, trap_t* tr, qnode_t* qs)
 {
   segment_t s;
   int tu, tl, sk, tfirst, tlast;
-  int tfirstr, tlastr, tfirstl, tlastl;
+  int tfirstr = 0, tlastr = 0, tfirstl = 0, tlastl = 0;
   int i1, i2, t, tn;
   pointf tpt;
   int tritop = 0, tribot = 0, is_swapped;

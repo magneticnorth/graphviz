@@ -20,14 +20,12 @@
 **	Written by Kiem-Phong Vo.
 */
 
-#if __STD_C
+/**
+ * @param fa array of streams to poll
+ * @param n number of streams in array
+ * @param tm the amount of time in ms to wait for selecting
+ */
 int sfpoll(Sfio_t ** fa, reg int n, int tm)
-#else
-int sfpoll(fa, n, tm)
-Sfio_t **fa;			/* array of streams to poll */
-reg int n;			/* number of streams in array */
-int tm;				/* the amount of time in ms to wait for selecting */
-#endif
 {
     reg int r, c, m;
     reg Sfio_t *f;
@@ -153,7 +151,7 @@ int tm;				/* the amount of time in ms to wait for selecting */
 	    break;
 	}
 
-	free((Void_t *) fds);
+	free((void *) fds);
     }
 #endif /*_lib_poll*/
 
@@ -207,7 +205,7 @@ int tm;				/* the amount of time in ms to wait for selecting */
 	if (status[c] <= 0)
 	    continue;
 	if ((d = fa[c]->disc) && d->exceptf) {
-	    if ((r = (*d->exceptf) (fa[c], SF_READY, (Void_t *) 0, d)) < 0)
+	    if ((r = (*d->exceptf) (fa[c], SF_READY, (void *) 0, d)) < 0)
 		goto done;
 	    else if (r > 0)
 		goto retry;
@@ -227,6 +225,6 @@ int tm;				/* the amount of time in ms to wait for selecting */
     }
 
   done:
-    free((Void_t *) status);
+    free((void *) status);
     return r;
 }

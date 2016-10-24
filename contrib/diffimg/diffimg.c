@@ -26,15 +26,13 @@
 
 
 #ifdef WIN32 /*dependencies*/
-    #pragma comment( lib, "gd.lib" )
+    #pragma comment( lib, "libgd.lib" )
     #pragma comment( lib, "png.lib" )
     #pragma comment( lib, "gvc.lib" )
 #endif
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,9 +59,6 @@
 #endif
 
 #define NOT(v) (!(v))
-#if ! defined HAVE_BOOL && ! defined HAVE_STDBOOL_H && ! defined __cplusplus
-typedef unsigned char bool;
-#endif
 #ifndef false
 #define false 0
 #define true NOT(false)
@@ -136,9 +131,6 @@ static gdImagePtr imageLoad (char *filename)
 #endif
     }
     else if (strcasecmp(ext, ".jpg") == 0) {
-#ifndef HAVE_HAVE_LIBJPEG
-#undef HAVE_GD_JPEG
-#endif
 #ifdef HAVE_GD_JPEG
         im = gdImageCreateFromJpeg(f);
 #else

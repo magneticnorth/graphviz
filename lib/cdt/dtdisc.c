@@ -7,34 +7,19 @@
 **	Written by Kiem-Phong Vo (5/26/96)
 */
 
-#if __STD_C
-static Void_t* dtmemory(Dt_t* dt,Void_t* addr,size_t size,Dtdisc_t* disc)
-#else
-static Void_t* dtmemory(dt, addr, size, disc)
-Dt_t* 		dt;	/* dictionary			*/
-Void_t* 	addr;	/* address to be manipulate	*/
-size_t		size;	/* size to obtain		*/
-Dtdisc_t* 	disc;	/* discipline			*/
-#endif
+static void* dtmemory(Dt_t* dt,void* addr,size_t size,Dtdisc_t* disc)
 {
 	if(addr)
 	{	if(size == 0)
 		{	free(addr);
-			return NIL(Void_t*);
+			return NIL(void*);
 		}
 		else	return realloc(addr,size);
 	}
-	else	return size > 0 ? malloc(size) : NIL(Void_t*);
+	else	return size > 0 ? malloc(size) : NIL(void*);
 }
 
-#if __STD_C
 Dtdisc_t* dtdisc(Dt_t* dt, Dtdisc_t* disc, int type)
-#else
-Dtdisc_t* dtdisc(dt,disc,type)
-Dt_t*		dt;
-Dtdisc_t*	disc;
-int		type;
-#endif
 {
 	reg Dtsearch_f	searchf;
 	reg Dtlink_t	*r, *t;
@@ -55,7 +40,7 @@ int		type;
 
 	UNFLATTEN(dt);
 
-	if(old->eventf && (*old->eventf)(dt,DT_DISC,(Void_t*)disc,old) < 0)
+	if(old->eventf && (*old->eventf)(dt,DT_DISC,(void*)disc,old) < 0)
 		return NIL(Dtdisc_t*);
 
 	dt->disc = disc;
@@ -95,10 +80,10 @@ int		type;
 		{	t = r->right;
 			if(!(type&DT_SAMEHASH))	/* new hash value */
 			{	k = (char*)_DTOBJ(r,disc->link);
-				k = _DTKEY((Void_t*)k,disc->key,disc->size);
+				k = _DTKEY((void*)k,disc->key,disc->size);
 				r->hash = _DTHSH(dt,k,disc,disc->size);
 			}
-			(void)(*searchf)(dt,(Void_t*)r,DT_RENEW);
+			(void)(*searchf)(dt,(void*)r,DT_RENEW);
 			r = t;
 		}
 	}

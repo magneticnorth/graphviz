@@ -11,21 +11,14 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef WIN32
 #include <io.h>
 #endif
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #include <string.h>
 #include <fcntl.h>
 
@@ -295,14 +288,14 @@ static void gdgen_missingfont(char *err, char *fontreq)
     }
 }
 
-extern gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
+gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
 
 /* fontsize at which text is omitted entirely */
 #define FONTSIZE_MUCH_TOO_SMALL 0.15
 /* fontsize at which text is rendered by a simple line */
 #define FONTSIZE_TOO_SMALL 1.5
 
-extern gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
+gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
 
 void gdgen_text(gdImagePtr im, pointf spf, pointf epf, int fontcolor, double fontsize, int fontdpi, double fontangle, char *fontname, char *str)
 {
@@ -368,7 +361,9 @@ static void gdgen_textspan(GVJ_t * job, pointf p, textspan_t * span)
     pointf spf, epf;
     double spanwidth = span->size.x * job->zoom * job->dpi.x / POINTS_PER_INCH;
     char* fontname;
+#ifdef HAVE_GD_FONTCONFIG
     PostscriptAlias *pA;
+#endif
 
     if (!im)
 	return;
@@ -415,7 +410,7 @@ static void gdgen_textspan(GVJ_t * job, pointf p, textspan_t * span)
 	    span->str);
 }
 
-static int gdgen_set_penstyle(GVJ_t * job, gdImagePtr im, gdImagePtr brush)
+static int gdgen_set_penstyle(GVJ_t * job, gdImagePtr im, gdImagePtr* brush)
 {
     obj_state_t *obj = job->obj;
     int i, pen, width, dashstyle[40];
@@ -445,15 +440,15 @@ static int gdgen_set_penstyle(GVJ_t * job, gdImagePtr im, gdImagePtr brush)
     /* use brush instead of Thickness to improve end butts */
     if (width != PENWIDTH_NORMAL) {
 	if (im->trueColor) {
-	    brush = gdImageCreateTrueColor(width,width);
+	    *brush = gdImageCreateTrueColor(width,width);
 	}
 	else {
-	    brush = gdImageCreate(width, width);
-	    gdImagePaletteCopy(brush, im);
+	    *brush = gdImageCreate(width, width);
+	    gdImagePaletteCopy(*brush, im);
 	}
-	gdImageFilledRectangle(brush, 0, 0, width - 1, width - 1,
+	gdImageFilledRectangle(*brush, 0, 0, width - 1, width - 1,
 			       obj->pencolor.u.index);
-	gdImageSetBrush(im, brush);
+	gdImageSetBrush(im, *brush);
 	if (pen == gdStyled)
 	    pen = gdStyledBrushed;
 	else
@@ -478,7 +473,7 @@ gdgen_bezier(GVJ_t * job, pointf * A, int n, int arrow_at_start,
     if (!im)
 	return;
 
-    pen = gdgen_set_penstyle(job, im, brush);
+    pen = gdgen_set_penstyle(job, im, &brush);
     pen_ok = (pen != gdImageGetTransparent(im));
     fill_ok = (filled && obj->fillcolor.u.index != gdImageGetTransparent(im));
 
@@ -522,7 +517,7 @@ static void gdgen_polygon(GVJ_t * job, pointf * A, int n, int filled)
     if (!im)
 	return;
 
-    pen = gdgen_set_penstyle(job, im, brush);
+    pen = gdgen_set_penstyle(job, im, &brush);
     pen_ok = (pen != gdImageGetTransparent(im));
     fill_ok = (filled && obj->fillcolor.u.index != gdImageGetTransparent(im));
 
@@ -557,7 +552,7 @@ static void gdgen_ellipse(GVJ_t * job, pointf * A, int filled)
     if (!im)
 	return;
 
-    pen = gdgen_set_penstyle(job, im, brush);
+    pen = gdgen_set_penstyle(job, im, &brush);
     pen_ok = (pen != gdImageGetTransparent(im));
     fill_ok = (filled && obj->fillcolor.u.index != gdImageGetTransparent(im));
 
@@ -587,7 +582,7 @@ static void gdgen_polyline(GVJ_t * job, pointf * A, int n)
     if (!im)
 	return;
 
-    pen = gdgen_set_penstyle(job, im, brush);
+    pen = gdgen_set_penstyle(job, im, &brush);
     pen_ok = (pen != gdImageGetTransparent(im));
 
     if (pen_ok) {

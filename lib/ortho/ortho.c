@@ -22,9 +22,7 @@
  * Edge concentrators?
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #define DEBUG
 #include <stddef.h>
@@ -152,7 +150,7 @@ convertSPtoRoute (sgraph* g, snode* fst, snode* lst)
     segment seg;
     double fix, b1, b2;
     int l1, l2;
-    pointf bp1, bp2, prevbp;  /* bend points */
+    pointf bp1, bp2, prevbp = {0.0,0.0};  /* bend points */
 
 	/* count no. of nodes in shortest path */
     for (ptr = fst; ptr; ptr = N_DAD(ptr)) sz++;
@@ -474,7 +472,7 @@ addLoop (sgraph* sg, cell* cp, snode* dp, snode* sp)
 	    ocp = onp->cells[0];
 	}
 	p = sidePt (onp, ocp);
-	wt = abs(p.x - midp.x) +  abs(p.y - midp.y);
+	wt = fabs(p.x - midp.x) +  fabs(p.y - midp.y);
 	if (onTop)
 	    createSEdge (sg, sp, onp, 0);  /* FIX weight */
 	else
@@ -504,7 +502,7 @@ addNodeEdges (sgraph* sg, cell* cp, snode* np)
 	else
 	    ocp = onp->cells[0];
 	p = sidePt (onp, ocp);
-	wt = abs(p.x - midp.x) +  abs(p.y - midp.y);
+	wt = fabs(p.x - midp.x) +  fabs(p.y - midp.y);
 	createSEdge (sg, np, onp, 0);  /* FIX weight */
     }
     sg->nnodes++;
@@ -518,7 +516,7 @@ addNodeEdges (sgraph* sg, cell* cp, snode* np)
 #include <intset.h>
 static char* bendToStr (bend b)
 {
-  char* s;
+  char* s = NULL;
   switch (b) {
   case B_NODE :
     s = "B_NODE";

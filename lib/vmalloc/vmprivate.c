@@ -23,16 +23,15 @@ static char *Version = "\n@(#)Vmalloc (AT&T Labs - kpv) 1999-08-05\0\n";
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
 
-/* Get more memory for a region */
-#if __STD_C
+/**
+ * Get more memory for a region
+ *
+ * @param vm region to increase in size
+ * @param size desired amount of space
+ * @param searchf tree search function
+ */
 static Block_t *vmextend(reg Vmalloc_t * vm, size_t size,
 			 Vmsearch_f searchf)
-#else
-static Block_t *vmextend(vm, size, searchf)
-reg Vmalloc_t *vm;		/* region to increase in size   */
-size_t size;			/* desired amount of space      */
-Vmsearch_f searchf;		/* tree search function         */
-#endif
 {
     reg size_t s;
     reg Seg_t *seg;
@@ -79,7 +78,7 @@ Vmsearch_f searchf;		/* tree search function         */
 
     while (!addr) {		/* try to get space */
 	if ((addr =
-	     (Vmuchar_t *) (*memoryf) (vm, NIL(Void_t *), 0, size,
+	     (Vmuchar_t *) (*memoryf) (vm, NIL(void *), 0, size,
 				       vm->disc)))
 	    break;
 
@@ -90,7 +89,7 @@ Vmsearch_f searchf;		/* tree search function         */
 	    int rv, lock;
 	    lock = vd->mode & VM_LOCK;
 	    vd->mode &= ~VM_LOCK;
-	    rv = (*exceptf) (vm, VM_NOMEM, (Void_t *) size, vm->disc);
+	    rv = (*exceptf) (vm, VM_NOMEM, (void *) size, vm->disc);
 	    vd->mode |= lock;
 	    if (rv <= 0) {
 		if (rv == 0)
@@ -137,7 +136,7 @@ Vmsearch_f searchf;		/* tree search function         */
 
 	seg = (Seg_t *) addr;
 	seg->vm = vm;
-	seg->addr = (Void_t *) (addr - (s ? ALIGN - s : 0));
+	seg->addr = (void *) (addr - (s ? ALIGN - s : 0));
 	seg->extent = size;
 	seg->baddr = addr + size - (s ? 2 * ALIGN : 0);
 	seg->free = NIL(Block_t *);
@@ -185,18 +184,17 @@ Vmsearch_f searchf;		/* tree search function         */
     return bp;
 }
 
-/* Truncate a segment if possible */
-#if __STD_C
+/**
+ * Truncate a segment if possible
+ *
+ * @param vm containing region
+ * @param seg the one to be truncated
+ * @param size amount of free space
+ * @param exact amount given was exact
+ */
 static int vmtruncate(Vmalloc_t * vm, Seg_t * seg, size_t size, int exact)
-#else
-static int vmtruncate(vm, seg, size, exact)
-Vmalloc_t *vm;			/* containing region            */
-Seg_t *seg;			/* the one to be truncated      */
-size_t size;			/* amount of free space         */
-int exact;			/* amount given was exact       */
-#endif
 {
-    reg Void_t *caddr;
+    reg void *caddr;
     reg Seg_t *last;
     reg Vmdata_t *vd = vm->data;
     reg Vmemory_f memoryf = vm->disc->memoryf;
@@ -258,9 +256,9 @@ int exact;			/* amount given was exact       */
 Vmextern_t _Vmextern = { vmextend,	/* _Vmextend    */
     vmtruncate,			/* _Vmtruncate  */
     0,				/* _Vmpagesize  */
-    NIL(char *(*)_ARG_((char *, char *, int))),	/* _Vmstrcpy    */
-    NIL(char *(*)_ARG_((Vmulong_t, int))),	/* _Vmitoa      */
-    NIL(void (*)_ARG_((Vmalloc_t *,
-		       Vmuchar_t *, Vmuchar_t *, size_t, size_t))),	/* _Vmtrace   */
-    NIL(void (*)_ARG_((Vmalloc_t *)))	/* _Vmpfclose       */
+    NIL(char *(*)(char *, char *, int)),	/* _Vmstrcpy    */
+    NIL(char *(*)(Vmulong_t, int)),	/* _Vmitoa      */
+    NIL(void (*)(Vmalloc_t *,
+		       Vmuchar_t *, Vmuchar_t *, size_t, size_t)),	/* _Vmtrace   */
+    NIL(void (*)(Vmalloc_t *))	/* _Vmpfclose       */
 };

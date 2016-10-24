@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -57,52 +55,52 @@ static void tkgen_print_tags(GVJ_t *job)
     char *ObjType;
     unsigned int ObjId;
     obj_state_t *obj = job->obj;
-    void *ObjFlag;
+    int ObjFlag;
 
     switch (obj->emit_state) {
     case EMIT_NDRAW:
 	ObjType = "node";
 	ObjFlag = 1;
-        ObjId = obj->u.n;
+        ObjId = AGID(obj->u.n);
 	break;
     case EMIT_NLABEL:
 	ObjType = "node";
 	ObjFlag = 0;
-        ObjId = obj->u.n;
+        ObjId = AGID(obj->u.n);
 	break;
     case EMIT_EDRAW:
     case EMIT_TDRAW:
     case EMIT_HDRAW:
 	ObjType = "edge";
 	ObjFlag = 1;
-        ObjId = obj->u.e;
+        ObjId = AGID(obj->u.e);
 	break;
     case EMIT_ELABEL:
     case EMIT_TLABEL:
     case EMIT_HLABEL:
 	ObjType = "edge";
 	ObjFlag = 0;
-        ObjId = obj->u.e;
+        ObjId = AGID(obj->u.e);
 	break;
     case EMIT_GDRAW:
 	ObjType = "graph";
 	ObjFlag = 1;
-	ObjId = obj->u.g;
+	ObjId = AGID(obj->u.g);
 	break;
     case EMIT_GLABEL:
 	ObjFlag = 0;
 	ObjType = "graph label";
-	ObjId = obj->u.g;
+	ObjId = AGID(obj->u.g);
 	break;
     case EMIT_CDRAW:
 	ObjType = "graph";
 	ObjFlag = 1;
-	ObjId = obj->u.sg;
+	ObjId = AGID(obj->u.sg);
 	break;
     case EMIT_CLABEL:
 	ObjType = "graph";
 	ObjFlag = 0;
-	ObjId = obj->u.sg;
+	ObjId = AGID(obj->u.sg);
 	break;
     default:
 	assert (0);
@@ -137,6 +135,8 @@ static void tkgen_begin_job(GVJ_t * job)
     gvputs(job, ")\n");
 }
 
+static int first_periphery;
+
 static void tkgen_begin_graph(GVJ_t * job)
 {
     obj_state_t *obj = job->obj;
@@ -147,9 +147,9 @@ static void tkgen_begin_graph(GVJ_t * job)
 	gvputs(job, tkgen_string(agnameof(obj->u.g)));
     }
     gvprintf(job, " Pages: %d\n", job->pagesArraySize.x * job->pagesArraySize.y);
-}
 
-static int first_periphery;
+    first_periphery = 0;
+}
 
 static void tkgen_begin_node(GVJ_t * job)
 {

@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/lib/cdt
 
 pkginclude_HEADERS = cgraph.h
-noinst_HEADERS = agxbuf.h cghdr.h malloc.h vmstub.h
+noinst_HEADERS = agxbuf.h cghdr.h malloc.h
 noinst_LTLIBRARIES = libcgraph_C.la
 lib_LTLIBRARIES = libcgraph.la
 pkgconfig_DATA = libcgraph.pc
@@ -34,10 +34,14 @@ scan.c: $(top_srcdir)/lib/cgraph/scan.l
 	rm @LEX_OUTPUT_ROOT@.c
 
 grammar.c: y.tab.c
-	@SED@ "s/yy/aag/g" < y.tab.c > grammar.c
+	@SED@ "s/yy/aag/g" < y.tab.c | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+                @SED@ "s/unsigned long/uint64_t/g" > grammar.c
 
 grammar.h: y.tab.h
-	@SED@ "s/yy/aag/g" < y.tab.h > grammar.h
+	@SED@ "s/yy/aag/g" < y.tab.h | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+                @SED@ "s/unsigned long/uint64_t/g" > grammar.h
 
 y.tab.c y.tab.h: y.output
 
@@ -49,6 +53,6 @@ cgraph.3.pdf: $(srcdir)/cgraph.3
 
 EXTRA_DIST = $(man_MANS) $(pdf_DATA) cmpnd.c \
 	main.c tester.c grammar.c grammar.h scan.c \
-	y.tab.c y.tab.h y.output cgraph.vcproj cgraph.def
+	y.tab.c y.tab.h y.output cgraph.vcxproj* cgraph.def
 
 DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch]

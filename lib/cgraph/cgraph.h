@@ -14,7 +14,8 @@
 #ifndef ATT_GRAPH_H
 #define ATT_GRAPH_H
 
-#include		"cdt.h"
+#include <inttypes.h>
+#include "cdt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +37,8 @@ extern "C" {
 #define NILnode			NIL(Agnode_t*)
 #define NILedge			NIL(Agedge_t*)
 #define NILsym			NIL(Agsym_t*)
+
+typedef uint64_t IDTYPE;
 
 /* forward struct type declarations */
 typedef struct Agtag_s Agtag_t;
@@ -80,7 +83,7 @@ struct Agtag_s {
     unsigned mtflock:1;		/* move-to-front lock, see above */
     unsigned attrwf:1;		/* attrs written (parity, write.c) */
     unsigned seq:(sizeof(unsigned) * 8 - 4);	/* sequence no. */
-    unsigned long id;		/* client  ID */
+    IDTYPE id;		        /* client  ID */
 };
 
 	/* object tags */
@@ -157,11 +160,11 @@ struct Agmemdisc_s {		/* memory allocator */
 
 struct Agiddisc_s {		/* object ID allocator */
     void *(*open) (Agraph_t * g, Agdisc_t*);	/* associated with a graph */
-    long (*map) (void *state, int objtype, char *str, unsigned long *id,
+    long (*map) (void *state, int objtype, char *str, IDTYPE *id,
 		 int createflag);
-    long (*alloc) (void *state, int objtype, unsigned long id);
-    void (*free) (void *state, int objtype, unsigned long id);
-    char *(*print) (void *state, int objtype, unsigned long id);
+    long (*alloc) (void *state, int objtype, IDTYPE id);
+    void (*free) (void *state, int objtype, IDTYPE id);
+    char *(*print) (void *state, int objtype, IDTYPE id);
     void (*close) (void *state);
     void (*idregister) (void *state, int objtype, void *obj);
 };
@@ -182,7 +185,7 @@ struct Agdisc_s {		/* user's discipline */
 	/* default resource disciplines */
 
 /*visual studio*/
-#if defined(WIN32) && !defined(CGRAPH_EXPORTS)
+#if defined(_MSC_VER) && !defined(CGRAPH_EXPORTS)
 #define extern __declspec(dllimport)
 #endif
 /*end visual studio*/
@@ -223,7 +226,7 @@ struct Agclos_s {
     Agdisc_t disc;		/* resource discipline functions */
     Agdstate_t state;		/* resource closures */
     Dict_t *strdict;		/* shared string dict */
-    unsigned long seq[3];	/* local object sequence number counter */
+    uint64_t seq[3];	/* local object sequence number counter */
     Agcbstack_t *cb;		/* user and system callback function stacks */
     unsigned char callbacks_enabled;	/* issue user callbacks or hold them? */
     Dict_t *lookup_by_name[3];
@@ -243,7 +246,7 @@ struct Agraph_s {
 };
 
 
-#if _PACKAGE_ast
+#if defined(_PACKAGE_ast)
 /* fine control of object callbacks */
 #   if defined(_BLD_cgraph) && defined(__EXPORT__)
 #	define extern  __EXPORT__
@@ -273,7 +276,7 @@ extern int agissimple(Agraph_t * g);
 
 /* nodes */
 extern Agnode_t *agnode(Agraph_t * g, char *name, int createflag);
-extern Agnode_t *agidnode(Agraph_t * g, unsigned long id, int createflag);
+extern Agnode_t *agidnode(Agraph_t * g, IDTYPE id, int createflag);
 extern Agnode_t *agsubnode(Agraph_t * g, Agnode_t * n, int createflag);
 extern Agnode_t *agfstnode(Agraph_t * g);
 extern Agnode_t *agnxtnode(Agraph_t * g, Agnode_t * n);
@@ -281,12 +284,13 @@ extern Agnode_t *aglstnode(Agraph_t * g);
 extern Agnode_t *agprvnode(Agraph_t * g, Agnode_t * n);
 
 extern Agsubnode_t *agsubrep(Agraph_t * g, Agnode_t * n);
+extern int agnodebefore(Agnode_t *u, Agnode_t *v); /* we have no shame */
 
 /* edges */
 extern Agedge_t *agedge(Agraph_t * g, Agnode_t * t, Agnode_t * h,
 			char *name, int createflag);
 extern Agedge_t *agidedge(Agraph_t * g, Agnode_t * t, Agnode_t * h,
-			  unsigned long id, int createflag);
+              IDTYPE id, int createflag);
 extern Agedge_t *agsubedge(Agraph_t * g, Agedge_t * e, int createflag);
 extern Agedge_t *agfstin(Agraph_t * g, Agnode_t * n);
 extern Agedge_t *agnxtin(Agraph_t * g, Agedge_t * e);
@@ -363,7 +367,7 @@ extern int agsafeset(void* obj, char* name, char* value, char* def);
 
 /* defintions for subgraphs */
 extern Agraph_t *agsubg(Agraph_t * g, char *name, int cflag);	/* constructor */
-extern Agraph_t *agidsubg(Agraph_t * g, unsigned long id, int cflag);	/* constructor */
+extern Agraph_t *agidsubg(Agraph_t * g, IDTYPE id, int cflag);	/* constructor */
 extern Agraph_t *agfstsubg(Agraph_t * g), *agnxtsubg(Agraph_t * subg);
 extern Agraph_t *agparent(Agraph_t * g);
 
@@ -414,12 +418,12 @@ extern agusererrf agseterrf(agusererrf);
 #define TAILPORT_ID		"tailport"
 #define HEADPORT_ID		"headport"
 
-#if _PACKAGE_ast
+#if defined(_PACKAGE_ast)
 #   if !defined(_BLD_cgraph) && defined(__IMPORT__)
 #	define extern  __IMPORT__
 #   endif
 #endif
-#if defined(WIN32) && !defined(CGRAPH_EXPORTS)
+#if defined(_MSC_VER) && !defined(CGRAPH_EXPORTS)
 #define extern __declspec(dllimport)
 #endif
 
@@ -457,9 +461,7 @@ and edges are embedded in main graph objects but allocated separately in subgrap
 #define EDGEOF(sn,rep)		(AGSNMAIN(sn)?((Agedge_t*)((unsigned char*)(rep) - offsetof(Agedge_t,seq_link))) : ((Dthold_t*)(rep))->obj)
 
 #undef extern
-#if _PACKAGE_ast
-_END_EXTERNS_
-#endif
+
 #ifdef __cplusplus
 }
 #endif

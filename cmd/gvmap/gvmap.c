@@ -11,9 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,11 +20,7 @@
 #include "QuadTree.h"
 #include <time.h>
 #include "SparseMatrix.h"
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#else
-#include "compat_getopt.h"
-#endif
 #include "string.h"
 #include "make_map.h"
 #include "spring_electrical.h"
@@ -61,7 +55,7 @@ static char swork[maxlen];
     #pragma comment( lib, "fdpgen.lib" )
     #pragma comment( lib, "sparse.lib" )
     #pragma comment( lib, "cdt.lib" )
-    #pragma comment( lib, "gts.lib" )
+    //#pragma comment( lib, "gts.lib" )
     #pragma comment( lib, "glib-2.0.lib" )
     #pragma comment( lib, "vpsc.lib" )
     #pragma comment( lib, "patchwork.lib" )
@@ -196,13 +190,13 @@ static char* usestr =
       10 : light grey\n\
     -c_opacity=xx - 2-character hex string for opacity of polygons\n\
     -C k - generate at most k clusters. (0)\n\
-    -d s - seed used to calculate Fielder vector for optimal coloring\n\
+    -d s - seed used to calculate Fiedler vector for optimal coloring\n\
     -D   - use top-level cluster subgraphs to specify clustering\n\
     -e   - show edges\n\
     -g c - bounding box color. If not specified, a bounding box is not drawn.\n\
     -h k - number of artificial points added to maintain bridge between endpoints (0)\n\
     -highlight=k - only draw cluster k\n\
-    -k   - increase randomesss of boundary\n\
+    -k   - increase randomness of boundary\n\
     -l s - specify label\n\
     -m v - bounding box margin. If 0, auto-assigned (0)\n\
     -o <file> - put output in <file> (stdout)\n\
@@ -213,7 +207,7 @@ static char* usestr =
        2 : label points\n\
        3 : random/artificial points\n\
     -r k - number of random points k used to define sea and lake boundaries. If 0, auto assigned. (0)\n\
-    -s v - depth of the sea and lake shores in points. If 0, auto assigned. (0)\n\
+    -s v - depth of the sea and lake shores in points. If < 0, auto assigned. (0)\n\
     -t n - improve contiguity up to n times. (0)\n\
     -v   - verbose\n\
     -z c - polygon line color (black)\n";
@@ -566,6 +560,7 @@ makeMap (SparseMatrix graph, int n, real* x, real* width, int* grouping,
 				 pm->shore_depth_tol, edge_bridge_tol, &xcombined, &nverts, &x_poly, &npolys, &poly_lines, 
 				 &polys, &polys_groups, &poly_point_map, &country_graph, pm->highlight_cluster, &flag);
 
+  if (Verbose) fprintf(stderr,"nart = %d\n",nart);
   /* compute a good color permutation */
   if (pm->color_optimize && country_graph && rgb_r && rgb_g && rgb_b) 
     map_optimal_coloring(pm->seed, country_graph, rgb_r,  rgb_g, rgb_b);

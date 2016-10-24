@@ -17,14 +17,12 @@
 **
 **	Written by Kiem-Phong Vo.
 */
-#if __STD_C
+/**
+ * @param f write to this stream
+ * @param s string to write
+ * @param rc record separator
+ */
 ssize_t sfputr(reg Sfio_t * f, const char *s, reg int rc)
-#else
-ssize_t sfputr(f, s, rc)
-reg Sfio_t *f;			/* write to this stream */
-char *s;			/* string to write      */
-reg int rc;			/* record separator.    */
-#endif
 {
     reg ssize_t p, n, w;
     reg uchar *ps;
@@ -103,7 +101,7 @@ reg int rc;			/* record separator.    */
 	if (n > w)
 	    n = w;
 	f->next -= n;
-	(void) SFWRITE(f, (Void_t *) f->next, n);
+	(void) SFWRITE(f, (void *) f->next, n);
     }
 
     SFOPEN(f, 0);

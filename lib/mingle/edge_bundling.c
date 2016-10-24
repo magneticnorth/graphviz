@@ -8,9 +8,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "types.h"
 #include "globals.h"
@@ -773,7 +771,7 @@ pedge* edge_bundling(SparseMatrix A0, int dim, real *x, int maxit_outer, real K,
   int i;
   real tol = 0.001;
   int k;
-  real step0 = 0.1, start;
+  real step0 = 0.1, start = 0.0;
   int maxit = 10;
   int flag; 
 

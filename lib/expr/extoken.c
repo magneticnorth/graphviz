@@ -18,9 +18,7 @@
  * expression library default lexical analyzer
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "exlib.h"
 #include <string.h>
@@ -85,6 +83,10 @@ trace(Expr_t* ex, int lev, char* op, int c)
 	case GE:
 		s = " GE ";
 		t = ">=";
+		break;
+	case CONSTANT:
+		s = " CONSTANT ";
+		t = exlval.id->name;
 		break;
 	case ID:
 		s = " ID ";
@@ -706,7 +708,7 @@ extoken_fn(register Expr_t* ex)
 					{
 						int	b;
 						int	n;
-						int	pc;
+						int	pc = 0;
 						int	po;
 						int	t;
 

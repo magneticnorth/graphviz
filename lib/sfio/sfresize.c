@@ -17,13 +17,7 @@
 	Written by Kiem-Phong Vo.
 */
 
-#if __STD_C
 int sfresize(Sfio_t * f, Sfoff_t size)
-#else
-int sfresize(f, size)
-Sfio_t *f;
-Sfoff_t size;
-#endif
 {
     SFMTXSTART(f, -1);
 
@@ -39,7 +33,7 @@ Sfoff_t size;
 	if (f->extent >= size) {
 	    if ((f->flags & SF_MALLOC) && (f->next - f->data) <= size) {
 		size_t s = (((size_t) size + 1023) / 1024) * 1024;
-		Void_t *d;
+		void *d;
 		if (s < f->size && (d = realloc(f->data, s))) {
 		    f->data = d;
 		    f->size = s;

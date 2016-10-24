@@ -16,9 +16,7 @@
 #include "mainwindow.h"
 #include "mdichild.h"
 #include "csettings.h"
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include	<string.h>
 
@@ -37,8 +35,8 @@ static void freeList(char **lp, int count)
     free(lp);
 }
 
-static int LoadPlugins(QComboBox * cb, GVC_t * gvc, char *kind,
-		       char *more[], char *prefer)
+static int LoadPlugins(QComboBox * cb, GVC_t * gvc, const char *kind,
+		       const char *more[], const char *prefer)
 {
     int count;
     char **lp = gvPluginList(gvc, kind, &count, NULL);
@@ -55,7 +53,7 @@ static int LoadPlugins(QComboBox * cb, GVC_t * gvc, char *kind,
     /* Add additional items if supplied */
     if (more) {
 	int i = 0;
-	char *s;
+	const char *s;
 	while ((s = more[i++])) {
 	    cb->addItem(QString(s));
 	}
@@ -117,9 +115,9 @@ void CMainWindow::createConsole()
 
 }
 
-static char *xtra[] = {
+static const char *xtra[] = {
     "NONE",
-    (char *) 0
+    (const char *) NULL
 };
 
 CMainWindow::CMainWindow(char*** Files)
@@ -171,7 +169,7 @@ CMainWindow::CMainWindow(char*** Files)
 //    (QComboBox*)frmSettings->findChild<QComboBox*>("cbLayout")
     QComboBox *cb =
 	(QComboBox *) frmSettings->findChild < QComboBox * >("cbLayout");
-    dfltLayoutIdx = LoadPlugins(cb, frmSettings->gvc, "layout", 0, "dot");
+    dfltLayoutIdx = LoadPlugins(cb, frmSettings->gvc, "layout", NULL, "dot");
     cb = (QComboBox *) frmSettings->findChild <
 	QComboBox * >("cbExtension");
     dfltRenderIdx =
@@ -289,7 +287,7 @@ void CMainWindow::setChild ()
 	msg.append("working on ");
 	msg.append(activeMdiChild()->currentFile());
 	msg.append("\n");
-	errorPipe((char *) msg.toAscii().constData());
+	errorPipe((char *) msg.toLatin1().constData());
 	prevChild = activeMdiChild();
     }
 }

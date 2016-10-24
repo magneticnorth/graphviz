@@ -17,14 +17,16 @@
 extern "C" {
 #endif
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if !defined(WIN32) && !defined(DARWIN)
+#define __USE_GNU
+#include <stdlib.h>
+#undef __USE_GNU
+#else
 #include <stdlib.h>
 #endif
 #ifdef HAVE_STDDEF_H
@@ -33,9 +35,9 @@ extern "C" {
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
+
+#include <inttypes.h>
 
 #include "types.h"
 #include "macros.h"

@@ -7,13 +7,7 @@
 **	Written by Kiem-Phong Vo (5/25/96)
 */
 
-#if __STD_C
 int dtrestore(reg Dt_t* dt, reg Dtlink_t* list)
-#else
-int dtrestore(dt, list)
-reg Dt_t*	dt;
-reg Dtlink_t*	list;
-#endif
 {
 	reg Dtlink_t	*t, **s, **ends;
 	reg int		type;
@@ -47,7 +41,7 @@ reg Dtlink_t*	list;
 		{	dt->data->size = 0;
 			while(list)
 			{	t = list->right;
-				(*searchf)(dt,(Void_t*)list,DT_RENEW);
+				(*searchf)(dt,(void*)list,DT_RENEW);
 				list = t;
 			}
 		}

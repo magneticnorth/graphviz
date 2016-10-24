@@ -53,6 +53,8 @@ exop.h: exparse.h
 exparse.c: y.tab.c 
 	@SED@ "s/yy/ex/g" <y.tab.c | \
 		@SED@ "s/YY/EX/g" | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+		@SED@ "s/unsigned long/uint64_t/g" | \
 		@SED@ "s/fprintf/sfprintf/g" | \
 		@SED@ "s/FILE/Sfio_t/g" | \
 		@SED@ "s/stderr/sfstderr/g" > exparse.c
@@ -60,7 +62,10 @@ exparse.c: y.tab.c
 exparse.h: y.tab.h
 	echo "#ifndef _EXPARSE_H" > exparse.h
 	echo "#define _EXPARSE_H" >> exparse.h
-	@SED@ "s/yy/ex/g" < y.tab.h | @SED@ "s/YY/EX/g" >> exparse.h
+	@SED@ "s/yy/ex/g" < y.tab.h | \
+		@SED@ "s/unsigned long int/uint64_t/g" | \
+		@SED@ "s/unsigned long/uint64_t/g" | \
+		@SED@ "s/YY/EX/g" >> exparse.h
 	echo "#endif /* _EXPARSE_H */" >> exparse.h
 
 y.tab.c y.tab.h: y.output
@@ -74,6 +79,6 @@ expr.3.pdf: $(srcdir)/expr.3
 EXTRA_DIST = $(man_MANS) $(pdf_DATA) \
 	Makefile.nmake Makefile.orig \
 	exparse.c exparse.h exop.h \
-	y.tab.c y.tab.h y.output expr.vcproj
+	y.tab.c y.tab.h y.output expr.vcxproj*
 
 DISTCLEANFILES = $(pdf_DATA) exparse.[ch] exop.h y.tab.[ch] y.output
